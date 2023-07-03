@@ -10,7 +10,8 @@
     },
     "states": {
         "page": 3,
-        "motion": 1
+        "motion": 1,
+        "error": 10
     },
     "images": {
         "logo": "logo.png",

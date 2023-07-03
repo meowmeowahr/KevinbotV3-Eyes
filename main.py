@@ -211,7 +211,7 @@ def eye_motion():
 def main_loop():
     while True:
         if state_watcher.state == States.STATE_ERROR:
-            error_periodic()
+            error_periodic(settings["states"]["error"])
         elif state_watcher.state == States.STATE_TV_STATIC:
             tv_static_periodic()
         elif state_watcher.state == States.STATE_EYE_SIMPLE:
