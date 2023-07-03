@@ -1,0 +1,34 @@
+{
+    "error_format": {
+        "border": 20,
+        "color": "#ff1212",
+        "bg_color": "#000000",
+        "font_size": 38,
+        "font": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+        "text": "ERROR {0}",
+        "flash_speed": 0.5
+    },
+    "states": {
+        "page": 3,
+        "motion": 1
+    },
+    "images": {
+        "logo": "logo.png",
+        "logo_time": 2
+    },
+    "display": {
+        "speed": 80000000
+    },
+    "skins": {
+        "simple": {
+            "bg_color": "#0022FF",
+            "iris_color": "#ffffff",
+            "pupil_color": "#000000",
+            "iris_size": 100,
+            "pupil_size": 80,
+            "left_point": [80, 120],
+            "center_point": [120, 120],
+            "right_point": [160, 120]
+        }
+    }
+}
