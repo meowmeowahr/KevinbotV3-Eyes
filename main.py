@@ -1,16 +1,22 @@
-import digitalio
-import board
+"""
+Kevinbot v3 Eyes
+Author: Kevin Ahr
+"""
+
+import enum
 import json
-import time
 import threading
-from PIL import Image, ImageDraw, ImageFont
+import time
+
+import board
+import digitalio
 import numpy as np
 from adafruit_rgb_display import st7789
-import enum
+from PIL import Image, ImageDraw, ImageFont
 
-
-with open("settings.json", "r") as f:
+with open("settings.json", "r", encoding="UTF-8") as f:
     settings = json.load(f)
+
 
 class States(enum.Enum):
     STATE_LOGO = 0
@@ -18,10 +24,12 @@ class States(enum.Enum):
     STATE_TV_STATIC = 2
     STATE_EYE_SIMPLE = 3
 
+
 class Motions(enum.Enum):
     DISABLE = 0
     LEFT_RIGHT = 1
     MANUAL = 2
+
 
 class MotionSegment(enum.Enum):
     CENTER_FROM_LEFT = 0
@@ -29,9 +37,10 @@ class MotionSegment(enum.Enum):
     LEFT = 2
     RIGHT = 3
 
+
 class StateWatcher:
     def __init__(self):
-          self._state = States(settings["states"]["page"])
+        self._state = States(settings["states"]["page"])
 
     @property
     def state(self):
@@ -77,13 +86,14 @@ else:
 image = Image.new("RGB", (width, height))
 draw = ImageDraw.Draw(image)
 
+
 def create_logo():
-    global state_watcher
     previous_state = state_watcher.state
     state_watcher.state = States.STATE_LOGO
     image = Image.open(settings["images"]["logo"])
     disp.image(image)
     state_watcher.state = previous_state
+
 
 def error_periodic(error=0):
     global image, draw, last_redraw, error_border_visible
@@ -96,15 +106,17 @@ def error_periodic(error=0):
             draw.rectangle((0, 0, width, height), fill=settings["error_format"]["bg_color"])
 
         draw.rectangle(
-            (settings["error_format"]["border"], 
-            settings["error_format"]["border"], 
-            width - settings["error_format"]["border"] - 1, 
-            height - settings["error_format"]["border"] - 1), 
+            (settings["error_format"]["border"],
+            settings["error_format"]["border"],
+            width - settings["error_format"]["border"] - 1,
+            height - settings["error_format"]["border"] - 1),
             fill=settings["error_format"]["bg_color"]
         )
 
-        font = ImageFont.truetype(settings["error_format"]["font"], settings["error_format"]["font_size"])
+        font = ImageFont.truetype(settings["error_format"]["font"],
+                                  settings["error_format"]["font_size"])
         (font_width, font_height) = font.getsize(settings["error_format"]["text"].format(error))
+        
         draw.text(
             (width // 2 - font_width // 2, height // 2 - font_height // 2),
             settings["error_format"]["text"].format(error),
@@ -115,11 +127,15 @@ def error_periodic(error=0):
         disp.image(image)
         last_redraw = time.time()
 
+
 def tv_static_periodic():
     global image, draw, last_redraw
 
     if last_redraw + 0.1 < time.time():
-        random_pixels = np.random.randint(0, 256, size=(disp.width // 2, disp.height // 2, 3), dtype=np.uint8)
+        random_pixels = np.random.randint(
+            0, 256,
+            size=(disp.width // 2, disp.height // 2, 3),
+            dtype=np.uint8)
 
         # Repeat each pixel to form 2x2 blocks
         static = np.repeat(np.repeat(random_pixels, 2, axis=0), 2, axis=1)
@@ -131,21 +147,22 @@ def tv_static_periodic():
         disp.image(image)
         last_redraw = time.time()
 
+
 def eye_simple_style():
     global image, draw, last_redraw
 
     if last_redraw + 0.05 < time.time():
         draw.rectangle((0, 0, width, height), fill=settings["skins"]["simple"]["bg_color"])
-        draw.ellipse((eye_x - settings["skins"]["simple"]["iris_size"] // 2, 
-                      eye_y - settings["skins"]["simple"]["iris_size"] // 2, 
-                      eye_x + settings["skins"]["simple"]["iris_size"] // 2, 
-                      eye_y + settings["skins"]["simple"]["iris_size"] // 2), 
+        draw.ellipse((eye_x - settings["skins"]["simple"]["iris_size"] // 2,
+                      eye_y - settings["skins"]["simple"]["iris_size"] // 2,
+                      eye_x + settings["skins"]["simple"]["iris_size"] // 2,
+                      eye_y + settings["skins"]["simple"]["iris_size"] // 2),
                       fill=settings["skins"]["simple"]["iris_color"])
 
-        draw.ellipse((eye_x - settings["skins"]["simple"]["pupil_size"] // 2, 
-                      eye_y - settings["skins"]["simple"]["pupil_size"] // 2, 
-                      eye_x + settings["skins"]["simple"]["pupil_size"] // 2, 
-                      eye_y + settings["skins"]["simple"]["pupil_size"] // 2), 
+        draw.ellipse((eye_x - settings["skins"]["simple"]["pupil_size"] // 2,
+                      eye_y - settings["skins"]["simple"]["pupil_size"] // 2,
+                      eye_x + settings["skins"]["simple"]["pupil_size"] // 2,
+                      eye_y + settings["skins"]["simple"]["pupil_size"] // 2),
                       fill=settings["skins"]["simple"]["pupil_color"])
 
 
