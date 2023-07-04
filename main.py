@@ -264,6 +264,10 @@ def serial_loop():
                     settings["states"]["page"] = clamp(int(pair[1]), 1, len(States.list()))
                     state_watcher.state = States(settings["states"]["page"])
                     save_settings()
+            if pair[0] == "set_error":
+                if pair[1].isdigit():
+                    settings["states"]["error"] = int(pair[1])
+                    save_settings()
         else:
             logging.warning(f"Expected 2 pairs, got {len(pair)}")
 

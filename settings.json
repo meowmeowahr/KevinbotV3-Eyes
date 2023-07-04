@@ -9,9 +9,9 @@
     "flash_speed": 0.5
   },
   "states": {
-    "page": 3,
+    "page": 1,
     "motion": 1,
-    "error": 10
+    "error": 0
   },
   "images": {
     "logo": "logo.png",
