@@ -13,6 +13,11 @@ import digitalio
 import numpy as np
 from adafruit_rgb_display import st7789
 from PIL import Image, ImageDraw, ImageFont
+import serial
+
+
+SERIAL_PORT = "/dev/ttyS0"
+SERIAL_BAUD = 115200
 
 with open("settings.json", "r", encoding="UTF-8") as f:
     settings = json.load(f)
@@ -50,6 +55,7 @@ class StateWatcher:
     def state(self, s):
         self._state = s
 
+
 last_redraw = time.time()
 error_border_visible = True
 state_watcher = StateWatcher()
@@ -66,9 +72,9 @@ reset_pin = digitalio.DigitalInOut(board.D24)
 spi = board.SPI()
 
 disp = st7789.ST7789(
-    spi, 
-    height=240, 
-    y_offset=80, 
+    spi,
+    height=240,
+    y_offset=80,
     rotation=180,
     cs=cs_pin,
     dc=dc_pin,
@@ -116,7 +122,7 @@ def error_periodic(error=0):
         font = ImageFont.truetype(settings["error_format"]["font"],
                                   settings["error_format"]["font_size"])
         (font_width, font_height) = font.getsize(settings["error_format"]["text"].format(error))
-        
+
         draw.text(
             (width // 2 - font_width // 2, height // 2 - font_height // 2),
             settings["error_format"]["text"].format(error),
@@ -170,10 +176,14 @@ def eye_simple_style():
         last_redraw = time.time()
 
 def cubic_in_out(t):
+    """
+    CubicInOut Easing Curve
+    """
     if t < 0.5:
         return 4 * t ** 3
     else:
         return 1 - (-2 * t + 2) ** 3 / 2
+
 
 def eye_motion():
     global motion, eye_x
@@ -219,11 +229,29 @@ def main_loop():
         time.sleep(0.001)
 
 
+def serial_loop():
+    print("ser")
+    while True:
+        data = ser.readline().decode("UTF-8")
+        pair = data.split("=")
+        if len(pair) == 2:
+            pass
+        else:
+            print(f"Expected 2 pairs, got {len(pair)}")
+        print(data)
+
+
 if __name__ == "__main__":
+    ser = serial.Serial(SERIAL_PORT, SERIAL_BAUD)
+    ser
+
     create_logo()
     time.sleep(settings["images"]["logo_time"])
 
     motion_thread = threading.Thread(target=eye_motion, daemon=True)
     motion_thread.start()
+
+    serial_thread = threading.Thread(target=serial_loop, daemon=True)
+    serial_thread.start()
 
     main_loop()
