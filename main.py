@@ -6,6 +6,7 @@ Author: Kevin Ahr
 import enum
 import json
 import threading
+import logging
 import time
 
 import board
@@ -237,13 +238,13 @@ def serial_loop():
         if len(pair) == 2:
             pass
         else:
-            print(f"Expected 2 pairs, got {len(pair)}")
+            logging.warning(f"Expected 2 pairs, got {len(pair)}")
         print(data)
 
 
 if __name__ == "__main__":
+    logging.basicConfig()
     ser = serial.Serial(SERIAL_PORT, SERIAL_BAUD)
-    ser
 
     create_logo()
     time.sleep(settings["images"]["logo_time"])
