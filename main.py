@@ -24,7 +24,18 @@ with open("settings.json", "r", encoding="UTF-8") as f:
     settings = json.load(f)
 
 
-class States(enum.Enum):
+def clamp(n, minn, maxn):
+    return max(min(maxn, n), minn)
+
+
+class ExtendedEnum(enum.Enum):
+
+    @classmethod
+    def list(cls):
+        return list(map(lambda c: c.value, cls))
+
+
+class States(ExtendedEnum):
     STATE_LOGO = 0
     STATE_ERROR = 1
     STATE_TV_STATIC = 2
@@ -46,7 +57,7 @@ class MotionSegment(enum.Enum):
 
 class StateWatcher:
     def __init__(self):
-        self._state = States(settings["states"]["page"])
+        self._state = States(clamp(settings["states"]["page"], 1, len(States.list())))
 
     @property
     def state(self):
@@ -94,6 +105,11 @@ image = Image.new("RGB", (width, height))
 draw = ImageDraw.Draw(image)
 
 
+def save_settings():
+    with open('settings.json', 'w') as file:
+        json.dump(settings, file, indent=2)
+
+
 def create_logo():
     previous_state = state_watcher.state
     state_watcher.state = States.STATE_LOGO
@@ -103,9 +119,12 @@ def create_logo():
 
 
 def error_periodic(error=0):
-    global image, draw, last_redraw, error_border_visible
+    global image, draw, last_redraw, error_border_visible    
 
     if last_redraw + settings["error_format"]["flash_speed"] < time.time():
+        image = Image.new("RGB", (width, height))
+        draw = ImageDraw.Draw(image)
+
         error_border_visible = not error_border_visible
         if error_border_visible:
             draw.rectangle((0, 0, width, height), fill=settings["error_format"]["color"])
@@ -159,6 +178,9 @@ def eye_simple_style():
     global image, draw, last_redraw
 
     if last_redraw + 0.05 < time.time():
+        image = Image.new("RGB", (width, height))
+        draw = ImageDraw.Draw(image)
+
         draw.rectangle((0, 0, width, height), fill=settings["skins"]["simple"]["bg_color"])
         draw.ellipse((eye_x - settings["skins"]["simple"]["iris_size"] // 2,
                       eye_y - settings["skins"]["simple"]["iris_size"] // 2,
@@ -195,7 +217,7 @@ def eye_motion():
                 target_point = (settings["skins"]["simple"]["left_point"])
             elif motion_segment == MotionSegment.RIGHT:
                 target_point = (settings["skins"]["simple"]["right_point"])
-            
+
             start_x = eye_x
             end_x = target_point[0]
             num_steps = 200
@@ -234,12 +256,16 @@ def serial_loop():
     print("ser")
     while True:
         data = ser.readline().decode("UTF-8")
-        pair = data.split("=")
+        pair = data.strip("\r\n").split("=")
+        print(pair)
         if len(pair) == 2:
-            pass
+            if pair[0] == "set_state":
+                if pair[1].isdigit():
+                    settings["states"]["page"] = clamp(int(pair[1]), 1, len(States.list()))
+                    state_watcher.state = States(settings["states"]["page"])
+                    save_settings()
         else:
             logging.warning(f"Expected 2 pairs, got {len(pair)}")
-        print(data)
 
 
 if __name__ == "__main__":
