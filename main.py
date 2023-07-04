@@ -268,6 +268,21 @@ def serial_loop():
                 if pair[1].isdigit():
                     settings["states"]["error"] = int(pair[1])
                     save_settings()
+            if pair[0] == "set_skin_option":
+                option_pairs = pair[1].split(":")
+                if len(option_pairs) == 3:
+                    if option_pairs[2].isdigit():
+                        value = int(option_pairs[2])
+                    else:
+                        value = option_pairs[2]
+                    if option_pairs[0] in settings["skins"]:
+                        if option_pairs[1] in settings["skins"][option_pairs[0]]:
+                            settings["skins"][option_pairs[0]][option_pairs[1]] = value
+                            save_settings()
+                        else:
+                            logging.warning(f"Option {option_pairs[1]} for {option_pairs[0]} does not exist")
+                    else:
+                        logging.warning(f"Skin {option_pairs[0]} does not exist")
         else:
             logging.warning(f"Expected 2 pairs, got {len(pair)}")
 
