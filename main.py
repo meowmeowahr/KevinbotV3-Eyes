@@ -16,7 +16,7 @@ from adafruit_rgb_display import st7789
 from PIL import Image, ImageDraw, ImageFont
 import serial
 
-import utils
+import skins
 
 
 SERIAL_PORT = "/dev/ttyS0"
@@ -26,8 +26,11 @@ with open("settings.json", "r", encoding="UTF-8") as f:
     settings = json.load(f)
 
 
-def clamp(n, minn, maxn):
-    return max(min(maxn, n), minn)
+def clamp(val, minn, maxn):
+    """
+    Clamp value to min/max
+    """
+    return max(min(maxn, val), minn)
 
 
 class ExtendedEnum(enum.Enum):
@@ -86,8 +89,8 @@ class StateWatcher:
         return self._state
 
     @state.setter
-    def state(self, s):
-        self._state = s
+    def state(self, val):
+        self._state = val
 
 
 last_redraw = time.time()
@@ -123,16 +126,19 @@ else:
     width = disp.width  # we swap height/width to rotate it to landscape!
     height = disp.height
 
-realistic_iris = Image.open("iris.png")
-aluminum = Image.open("aluminum.png")
-
 
 def save_settings():
-    with open('settings.json', 'w') as file:
+    """
+    Save settings.json
+    """
+    with open('settings.json', 'w', encoding="UTF-8") as file:
         json.dump(settings, file, indent=2)
 
 
 def create_logo():
+    """
+    Show Kevinbot v3 Logo on screen
+    """
     previous_state = state_watcher.state
     state_watcher.state = States.STATE_LOGO
     image = Image.open(settings["images"]["logo"])
@@ -141,7 +147,7 @@ def create_logo():
 
 
 def error_periodic(error=0):
-    global image, draw, last_redraw, error_border_visible
+    global last_redraw, error_border_visible
 
     if last_redraw + settings["error_format"]["flash_speed"] < time.time():
         image = Image.new("RGB", (width, height))
@@ -180,11 +186,10 @@ def error_periodic(error=0):
 
 
 def tv_static_periodic():
-    global image, draw, last_redraw
+    global last_redraw
 
     if last_redraw + 0.1 < time.time():
         image = Image.new("RGB", (width, height))
-        draw = ImageDraw.Draw(image)
 
         random_pixels = np.random.randint(
             0, 256,
@@ -201,60 +206,6 @@ def tv_static_periodic():
         last_redraw = time.time()
 
 
-def eye_simple_style():
-    global image, draw, last_redraw
-
-    if last_redraw + 0.05 < time.time():
-        image = Image.new("RGB", (width, height))
-        draw = ImageDraw.Draw(image)
-
-        draw.rectangle((0, 0, width, height),
-                       fill=settings["skins"]["simple"]["bg_color"])
-        draw.ellipse((eye_x - settings["skins"]["simple"]["iris_size"] // 2,
-                      eye_y - settings["skins"]["simple"]["iris_size"] // 2,
-                      eye_x + settings["skins"]["simple"]["iris_size"] // 2,
-                      eye_y + settings["skins"]["simple"]["iris_size"] // 2),
-                     fill=settings["skins"]["simple"]["iris_color"])
-
-        draw.ellipse((eye_x - settings["skins"]["simple"]["pupil_size"] // 2,
-                      eye_y - settings["skins"]["simple"]["pupil_size"] // 2,
-                      eye_x + settings["skins"]["simple"]["pupil_size"] // 2,
-                      eye_y + settings["skins"]["simple"]["pupil_size"] // 2),
-                     fill=settings["skins"]["simple"]["pupil_color"])
-
-        disp.image(image)
-        last_redraw = time.time()
-
-
-def eye_metallic_style():
-    global image, draw, last_redraw
-
-    if last_redraw + 0.05 < time.time():
-        image = Image.new("RGB", (width, height))
-        draw = ImageDraw.Draw(image)
-
-        draw.rectangle((0, 0, width, height),
-                       fill=settings["skins"]["realistic"]["bg_color"])
-
-        iris = realistic_iris.resize(
-            (settings["skins"]["realistic"]["iris_size"],
-             settings["skins"]["realistic"]["iris_size"]))
-        iris_array = np.array(iris)
-        shifted_iris = Image.fromarray(
-            utils.shift_hue(
-                iris_array,
-                settings["skins"]["realistic"]["tint"]),
-            'RGBA')
-
-        image.paste(aluminum.resize((width, height)), (0, 0))
-
-        image.paste(shifted_iris, (int(eye_x - iris.width // 2),
-                                   int(eye_y - iris.height // 2)), iris)
-
-        disp.image(image)
-        last_redraw = time.time()
-
-
 def cubic_in_out(t):
     """
     CubicInOut Easing Curve
@@ -266,7 +217,7 @@ def cubic_in_out(t):
 
 
 def eye_motion():
-    global motion, eye_x
+    global eye_x
     motion_segment = MotionSegment.RIGHT
     while True:
         if motion == Motions.LEFT_RIGHT:
@@ -305,14 +256,13 @@ def main_loop():
         elif state_watcher.state == States.STATE_TV_STATIC:
             tv_static_periodic()
         elif state_watcher.state == States.STATE_EYE_SIMPLE:
-            eye_simple_style()
+            skins.eye_simple_style(disp, last_redraw, settings, (eye_x, eye_y), (width, height))
         elif state_watcher.state == States.STATE_EYE_METAL:
-            eye_metallic_style()
+            skins.eye_metallic_style(disp, last_redraw, settings, (eye_x, eye_y), (width, height))
         time.sleep(0.001)
 
 
 def serial_loop():
-    print("ser")
     while True:
         data = ser.readline().decode("UTF-8")
         pair = data.strip("\r\n").split("=")
