@@ -60,7 +60,8 @@ class Motions(enum.Enum):
     """
     DISABLE = 0
     LEFT_RIGHT = 1
-    MANUAL = 2
+    JUMP = 2
+    MANUAL = 3
 
 
 class MotionSegment(enum.Enum):
@@ -219,12 +220,15 @@ def cubic_in_out(t):
 def eye_motion():
     global eye_x
     motion_segment = MotionSegment.RIGHT
+    previous_time = time.time()
     while True:
         if motion == Motions.LEFT_RIGHT:
             if motion_segment == MotionSegment.LEFT:
-                target_point = settings["skins"]["simple"]["left_point"]
+                target_point = settings["motions"]["left_point"]
             elif motion_segment == MotionSegment.RIGHT:
-                target_point = settings["skins"]["simple"]["right_point"]
+                target_point = settings["motions"]["right_point"]
+            else:
+                target_point = settings["motions"]["center_point"]
 
             start_x = eye_x
             end_x = target_point[0]
@@ -247,6 +251,36 @@ def eye_motion():
                     motion_segment = MotionSegment.RIGHT
                 elif motion_segment == MotionSegment.RIGHT:
                     motion_segment = MotionSegment.LEFT
+        if motion == Motions.JUMP:
+            current_time = time.time()
+            elapsed_time = current_time - previous_time
+            
+            if elapsed_time >= settings["motions"]["jump_time"]:
+                previous_time = current_time
+
+                if motion_segment == MotionSegment.LEFT:
+                    target_point = settings["motions"]["left_point"]
+                elif motion_segment == MotionSegment.RIGHT:
+                    target_point = settings["motions"]["right_point"]
+                else:
+                    target_point = settings["motions"]["center_point"]
+
+                start_x = eye_x
+                end_x = target_point[0]
+                eye_x = end_x
+
+                if eye_x == target_point[0]:
+                    if motion_segment == MotionSegment.LEFT:
+                        motion_segment = MotionSegment.CENTER_FROM_LEFT
+                    elif motion_segment == MotionSegment.RIGHT:
+                        motion_segment = MotionSegment.CENTER_FROM_RIGHT
+                    elif motion_segment == MotionSegment.CENTER_FROM_LEFT:
+                        motion_segment = MotionSegment.RIGHT
+                    elif motion_segment == MotionSegment.CENTER_FROM_RIGHT:
+                        motion_segment = MotionSegment.LEFT
+
+            else:
+                time.sleep(0.05)
 
 
 def main_loop():
@@ -263,6 +297,8 @@ def main_loop():
 
 
 def serial_loop():
+    global motion
+
     while True:
         data = ser.readline().decode("UTF-8")
         pair = data.strip("\r\n").split("=")
@@ -274,11 +310,11 @@ def serial_loop():
                         int(pair[1]), 1, len(States.list()))
                     state_watcher.state = States(settings["states"]["page"])
                     save_settings()
-            if pair[0] == "set_error":
+            elif pair[0] == "set_error":
                 if pair[1].isdigit():
                     settings["states"]["error"] = int(pair[1])
                     save_settings()
-            if pair[0] == "set_skin_option":
+            elif pair[0] == "set_skin_option":
                 option_pairs = pair[1].split(":")
                 if len(option_pairs) == 3:
                     if option_pairs[2].isdigit():
@@ -298,7 +334,7 @@ def serial_loop():
                     if type(settings["skins"][option_pairs[0]]
                             [option_pairs[1]]) in (list, tuple):
                         logging.warning(
-                            f"Cannot change a list or tuple object")
+                            "Cannot change a list or tuple object")
                     else:
                         settings["skins"][option_pairs[0]
                                           ][option_pairs[1]] = value
@@ -306,6 +342,14 @@ def serial_loop():
                 else:
                     logging.warning(
                         f"Expected 3 values, got {len(option_pairs)}")
+            elif pair[0] == "set_motion":
+                if pair[1].isdigit():
+                    if pair[1] in Motions:
+                        settings["states"]["motion"] = int(pair[1])
+                        motion = Motions(int(pair[1]))
+                        save_settings()
+                else:
+                    logging.warning(f"Expected digits, got {pair[1]}")
         else:
             logging.warning(f"Expected 2 pairs, got {len(pair)}")
 

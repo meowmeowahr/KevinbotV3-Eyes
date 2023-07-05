@@ -20,25 +20,28 @@
   "display": {
     "speed": 80000000
   },
+  "motions": {
+    "jump_time": 0.8,
+    "left_point": [
+      80,
+      120
+    ],
+    "center_point": [
+      120,
+      120
+    ],
+    "right_point": [
+      160,
+      120
+    ]
+  },
   "skins": {
     "simple": {
       "bg_color": "#0022ff",
       "iris_color": "#ffffff",
       "pupil_color": "#000000",
       "iris_size": 100,
-      "pupil_size": 80,
-      "left_point": [
-        80,
-        120
-      ],
-      "center_point": [
-        120,
-        120
-      ],
-      "right_point": [
-        160,
-        120
-      ]
+      "pupil_size": 80
     },
     "realistic": {
       "bg_color": "#ffffff",
