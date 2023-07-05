@@ -16,6 +16,8 @@ from adafruit_rgb_display import st7789
 from PIL import Image, ImageDraw, ImageFont
 import serial
 
+import utils
+
 
 SERIAL_PORT = "/dev/ttyS0"
 SERIAL_BAUD = 115200
@@ -29,26 +31,39 @@ def clamp(n, minn, maxn):
 
 
 class ExtendedEnum(enum.Enum):
-
+    """
+    Extended Enum Class
+    Adds list() function
+    """
     @classmethod
     def list(cls):
         return list(map(lambda c: c.value, cls))
 
 
 class States(ExtendedEnum):
+    """
+    States of display
+    """
     STATE_LOGO = 0
     STATE_ERROR = 1
     STATE_TV_STATIC = 2
     STATE_EYE_SIMPLE = 3
+    STATE_EYE_METAL = 4
 
 
 class Motions(enum.Enum):
+    """
+    Animations for display
+    """
     DISABLE = 0
     LEFT_RIGHT = 1
     MANUAL = 2
 
 
 class MotionSegment(enum.Enum):
+    """
+    Segments of animation
+    """
     CENTER_FROM_LEFT = 0
     CENTER_FROM_RIGHT = 1
     LEFT = 2
@@ -56,8 +71,15 @@ class MotionSegment(enum.Enum):
 
 
 class StateWatcher:
+    """
+    Watches state of display
+    """
+
     def __init__(self):
-        self._state = States(clamp(settings["states"]["page"], 1, len(States.list())))
+        self._state = States(
+            clamp(
+                settings["states"]["page"], 1, len(
+                    States.list())))
 
     @property
     def state(self):
@@ -101,8 +123,8 @@ else:
     width = disp.width  # we swap height/width to rotate it to landscape!
     height = disp.height
 
-image = Image.new("RGB", (width, height))
-draw = ImageDraw.Draw(image)
+realistic_iris = Image.open("iris.png")
+aluminum = Image.open("aluminum.png")
 
 
 def save_settings():
@@ -119,7 +141,7 @@ def create_logo():
 
 
 def error_periodic(error=0):
-    global image, draw, last_redraw, error_border_visible    
+    global image, draw, last_redraw, error_border_visible
 
     if last_redraw + settings["error_format"]["flash_speed"] < time.time():
         image = Image.new("RGB", (width, height))
@@ -127,21 +149,24 @@ def error_periodic(error=0):
 
         error_border_visible = not error_border_visible
         if error_border_visible:
-            draw.rectangle((0, 0, width, height), fill=settings["error_format"]["color"])
+            draw.rectangle((0, 0, width, height),
+                           fill=settings["error_format"]["color"])
         else:
-            draw.rectangle((0, 0, width, height), fill=settings["error_format"]["bg_color"])
+            draw.rectangle((0, 0, width, height),
+                           fill=settings["error_format"]["bg_color"])
 
         draw.rectangle(
             (settings["error_format"]["border"],
-            settings["error_format"]["border"],
-            width - settings["error_format"]["border"] - 1,
-            height - settings["error_format"]["border"] - 1),
+             settings["error_format"]["border"],
+             width - settings["error_format"]["border"] - 1,
+             height - settings["error_format"]["border"] - 1),
             fill=settings["error_format"]["bg_color"]
         )
 
         font = ImageFont.truetype(settings["error_format"]["font"],
                                   settings["error_format"]["font_size"])
-        (font_width, font_height) = font.getsize(settings["error_format"]["text"].format(error))
+        (font_width, font_height) = font.getsize(
+            settings["error_format"]["text"].format(error))
 
         draw.text(
             (width // 2 - font_width // 2, height // 2 - font_height // 2),
@@ -158,6 +183,9 @@ def tv_static_periodic():
     global image, draw, last_redraw
 
     if last_redraw + 0.1 < time.time():
+        image = Image.new("RGB", (width, height))
+        draw = ImageDraw.Draw(image)
+
         random_pixels = np.random.randint(
             0, 256,
             size=(disp.width // 2, disp.height // 2, 3),
@@ -168,7 +196,6 @@ def tv_static_periodic():
 
         # Create a PIL Image from the numpy array
         image = Image.fromarray(static)
-
 
         disp.image(image)
         last_redraw = time.time()
@@ -181,22 +208,52 @@ def eye_simple_style():
         image = Image.new("RGB", (width, height))
         draw = ImageDraw.Draw(image)
 
-        draw.rectangle((0, 0, width, height), fill=settings["skins"]["simple"]["bg_color"])
+        draw.rectangle((0, 0, width, height),
+                       fill=settings["skins"]["simple"]["bg_color"])
         draw.ellipse((eye_x - settings["skins"]["simple"]["iris_size"] // 2,
                       eye_y - settings["skins"]["simple"]["iris_size"] // 2,
                       eye_x + settings["skins"]["simple"]["iris_size"] // 2,
                       eye_y + settings["skins"]["simple"]["iris_size"] // 2),
-                      fill=settings["skins"]["simple"]["iris_color"])
+                     fill=settings["skins"]["simple"]["iris_color"])
 
         draw.ellipse((eye_x - settings["skins"]["simple"]["pupil_size"] // 2,
                       eye_y - settings["skins"]["simple"]["pupil_size"] // 2,
                       eye_x + settings["skins"]["simple"]["pupil_size"] // 2,
                       eye_y + settings["skins"]["simple"]["pupil_size"] // 2),
-                      fill=settings["skins"]["simple"]["pupil_color"])
-
+                     fill=settings["skins"]["simple"]["pupil_color"])
 
         disp.image(image)
         last_redraw = time.time()
+
+
+def eye_metallic_style():
+    global image, draw, last_redraw
+
+    if last_redraw + 0.05 < time.time():
+        image = Image.new("RGB", (width, height))
+        draw = ImageDraw.Draw(image)
+
+        draw.rectangle((0, 0, width, height),
+                       fill=settings["skins"]["realistic"]["bg_color"])
+
+        iris = realistic_iris.resize(
+            (settings["skins"]["realistic"]["iris_size"],
+             settings["skins"]["realistic"]["iris_size"]))
+        iris_array = np.array(iris)
+        shifted_iris = Image.fromarray(
+            utils.shift_hue(
+                iris_array,
+                settings["skins"]["realistic"]["tint"]),
+            'RGBA')
+
+        image.paste(aluminum.resize((width, height)), (0, 0))
+
+        image.paste(shifted_iris, (int(eye_x - iris.width // 2),
+                                   int(eye_y - iris.height // 2)), iris)
+
+        disp.image(image)
+        last_redraw = time.time()
+
 
 def cubic_in_out(t):
     """
@@ -214,9 +271,9 @@ def eye_motion():
     while True:
         if motion == Motions.LEFT_RIGHT:
             if motion_segment == MotionSegment.LEFT:
-                target_point = (settings["skins"]["simple"]["left_point"])
+                target_point = settings["skins"]["simple"]["left_point"]
             elif motion_segment == MotionSegment.RIGHT:
-                target_point = (settings["skins"]["simple"]["right_point"])
+                target_point = settings["skins"]["simple"]["right_point"]
 
             start_x = eye_x
             end_x = target_point[0]
@@ -229,7 +286,7 @@ def eye_motion():
                 x = start_x + (end_x - start_x) * easing_t
                 eye_x = x
 
-                if not motion == Motions.LEFT_RIGHT:
+                if motion != Motions.LEFT_RIGHT:
                     break
 
                 time.sleep(0.01)
@@ -249,6 +306,8 @@ def main_loop():
             tv_static_periodic()
         elif state_watcher.state == States.STATE_EYE_SIMPLE:
             eye_simple_style()
+        elif state_watcher.state == States.STATE_EYE_METAL:
+            eye_metallic_style()
         time.sleep(0.001)
 
 
@@ -261,7 +320,8 @@ def serial_loop():
         if len(pair) == 2:
             if pair[0] == "set_state":
                 if pair[1].isdigit():
-                    settings["states"]["page"] = clamp(int(pair[1]), 1, len(States.list()))
+                    settings["states"]["page"] = clamp(
+                        int(pair[1]), 1, len(States.list()))
                     state_watcher.state = States(settings["states"]["page"])
                     save_settings()
             if pair[0] == "set_error":
@@ -275,14 +335,27 @@ def serial_loop():
                         value = int(option_pairs[2])
                     else:
                         value = option_pairs[2]
-                    if option_pairs[0] in settings["skins"]:
-                        if option_pairs[1] in settings["skins"][option_pairs[0]]:
-                            settings["skins"][option_pairs[0]][option_pairs[1]] = value
-                            save_settings()
-                        else:
-                            logging.warning(f"Option {option_pairs[1]} for {option_pairs[0]} does not exist")
+                    if not option_pairs[0] in settings["skins"]:
+                        logging.warning(
+                            f"Skin {option_pairs[0]} does not exist")
+                        continue
+
+                    if not option_pairs[1] in settings["skins"][option_pairs[0]]:
+                        logging.warning(
+                            f"Option {option_pairs[1]} for {option_pairs[0]} does not exist")
+                        continue
+
+                    if type(settings["skins"][option_pairs[0]]
+                            [option_pairs[1]]) in (list, tuple):
+                        logging.warning(
+                            f"Cannot change a list or tuple object")
                     else:
-                        logging.warning(f"Skin {option_pairs[0]} does not exist")
+                        settings["skins"][option_pairs[0]
+                                          ][option_pairs[1]] = value
+                        save_settings()
+                else:
+                    logging.warning(
+                        f"Expected 3 values, got {len(option_pairs)}")
         else:
             logging.warning(f"Expected 2 pairs, got {len(pair)}")
 

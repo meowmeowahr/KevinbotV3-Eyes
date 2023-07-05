@@ -9,7 +9,7 @@
     "flash_speed": 0.5
   },
   "states": {
-    "page": 3,
+    "page": 4,
     "motion": 1,
     "error": 0
   },
@@ -39,6 +39,11 @@
         160,
         120
       ]
+    },
+    "realistic": {
+      "bg_color": "#ffffff",
+      "iris_size": 150,
+      "tint": 120
     }
   }
 }
