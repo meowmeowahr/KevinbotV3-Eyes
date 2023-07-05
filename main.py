@@ -52,6 +52,7 @@ class States(ExtendedEnum):
     STATE_TV_STATIC = 2
     STATE_EYE_SIMPLE = 3
     STATE_EYE_METAL = 4
+    STATE_EYE_NEON = 5
 
 
 class Motions(enum.Enum):
@@ -293,6 +294,8 @@ def main_loop():
             skins.eye_simple_style(disp, last_redraw, settings, (eye_x, eye_y), (width, height))
         elif state_watcher.state == States.STATE_EYE_METAL:
             skins.eye_metallic_style(disp, last_redraw, settings, (eye_x, eye_y), (width, height))
+        elif state_watcher.state == States.STATE_EYE_NEON:
+            skins.eye_neon_style(disp, last_redraw, settings, (eye_x, eye_y), (width, height))
         time.sleep(0.001)
 
 
@@ -349,7 +352,7 @@ def serial_loop():
                         motion = Motions(int(pair[1]))
                         save_settings()
                 else:
-                    logging.warning(f"Expected digits, got {pair[1]}")
+                    logging.warning("Expected digits, got %s", pair[1])
         else:
             logging.warning(f"Expected 2 pairs, got {len(pair)}")
 

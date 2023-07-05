@@ -9,7 +9,7 @@
     "flash_speed": 0.5
   },
   "states": {
-    "page": 4,
+    "page": 5,
     "motion": 1,
     "error": 0
   },
@@ -43,10 +43,15 @@
       "iris_size": 100,
       "pupil_size": 80
     },
-    "realistic": {
+    "metal": {
       "bg_color": "#ffffff",
       "iris_size": 150,
-      "tint": 120
+      "tint": 160
+    },
+    "neon": {
+      "bg_color": "#000000",
+      "iris_size": 100,
+      "tint": 150
     }
   }
 }
