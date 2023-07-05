@@ -255,7 +255,7 @@ def eye_motion():
         if motion == Motions.JUMP:
             current_time = time.time()
             elapsed_time = current_time - previous_time
-            
+
             if elapsed_time >= settings["motions"]["jump_time"]:
                 previous_time = current_time
 
@@ -291,11 +291,14 @@ def main_loop():
         elif state_watcher.state == States.STATE_TV_STATIC:
             tv_static_periodic()
         elif state_watcher.state == States.STATE_EYE_SIMPLE:
-            skins.eye_simple_style(disp, last_redraw, settings, (eye_x, eye_y), (width, height))
+            skins.eye_simple_style(
+                disp, last_redraw, settings, (eye_x, eye_y), (width, height))
         elif state_watcher.state == States.STATE_EYE_METAL:
-            skins.eye_metallic_style(disp, last_redraw, settings, (eye_x, eye_y), (width, height))
+            skins.eye_metallic_style(
+                disp, last_redraw, settings, (eye_x, eye_y), (width, height))
         elif state_watcher.state == States.STATE_EYE_NEON:
-            skins.eye_neon_style(disp, last_redraw, settings, (eye_x, eye_y), (width, height))
+            skins.eye_neon_style(
+                disp, last_redraw, settings, (eye_x, eye_y), (width, height))
         time.sleep(0.001)
 
 
@@ -326,12 +329,14 @@ def serial_loop():
                         value = option_pairs[2]
                     if not option_pairs[0] in settings["skins"]:
                         logging.warning(
-                            f"Skin {option_pairs[0]} does not exist")
+                            "Skin %s does not exist", option_pairs[0])
                         continue
 
                     if not option_pairs[1] in settings["skins"][option_pairs[0]]:
                         logging.warning(
-                            f"Option {option_pairs[1]} for {option_pairs[0]} does not exist")
+                            "Option %s for %s does not exist",
+                            option_pairs[1],
+                            option_pairs[0])
                         continue
 
                     if type(settings["skins"][option_pairs[0]]
@@ -344,7 +349,8 @@ def serial_loop():
                         save_settings()
                 else:
                     logging.warning(
-                        f"Expected 3 values, got {len(option_pairs)}")
+                        "Expected 3 values, got %s",
+                        len(option_pairs))
             elif pair[0] == "set_motion":
                 if pair[1].isdigit():
                     if pair[1] in Motions:
@@ -354,7 +360,7 @@ def serial_loop():
                 else:
                     logging.warning("Expected digits, got %s", pair[1])
         else:
-            logging.warning(f"Expected 2 pairs, got {len(pair)}")
+            logging.warning("Expected 2 pairs, got %s", len(pair))
 
 
 if __name__ == "__main__":

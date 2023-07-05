@@ -5,7 +5,6 @@ Author: Kevin Ahr
 
 import time
 
-import numpy as np
 from adafruit_rgb_display.rgb import Display
 from PIL import Image, ImageDraw
 
@@ -102,7 +101,7 @@ def eye_neon_style(display: Display,
             (settings["skins"]["neon"]["iris_size"],
              settings["skins"]["neon"]["iris_size"]),
              Image.ANTIALIAS)
-        shifted_iris = utils.shift_hue(iris, settings["skins"]["neon"]["tint"])
+        shifted_iris = utils.color_shift(iris, settings["skins"]["neon"]["fg_color"])
 
         image.paste(shifted_iris, (int(eye_x - iris.width // 2),
                                    int(eye_y - iris.height // 2)), iris)
