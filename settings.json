@@ -51,7 +51,8 @@
     "neon": {
       "bg_color": "#000000",
       "iris_size": 100,
-      "fg_color": "#0090ff"
+      "fg_color_start": "#0090ff",
+      "fg_color_end": "#9000ff"
     }
   }
 }
