@@ -107,7 +107,9 @@ def eye_neon_style(display: Display,
             settings["motions"]["right_point"][0],
             0, 100), 0, 100)
 
-        shifted_iris = utils.color_shift(iris, utils.blend_colors(settings["skins"]["neon"]["fg_color_start"], settings["skins"]["neon"]["fg_color_end"], motion_progress / 100))
+        shifted_iris = utils.color_shift(iris, utils.blend_colors(settings["skins"]["neon"]["fg_color_start"], 
+                                                                  settings["skins"]["neon"]["fg_color_end"], 
+                                                                  motion_progress / 100))
 
         image.paste(shifted_iris, (int(eye_x - iris.width // 2),
                                    int(eye_y - iris.height // 2)), iris)

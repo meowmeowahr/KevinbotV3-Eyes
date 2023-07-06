@@ -8,6 +8,7 @@ import json
 import threading
 import logging
 import time
+import copy
 
 import board
 import digitalio
@@ -17,6 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 import serial
 
 import skins
+import utils
 
 
 SERIAL_PORT = "/dev/ttyS0"
@@ -55,7 +57,7 @@ class States(ExtendedEnum):
     STATE_EYE_NEON = 5
 
 
-class Motions(enum.Enum):
+class Motions(ExtendedEnum):
     """
     Animations for display
     """
@@ -353,12 +355,16 @@ def serial_loop():
                         len(option_pairs))
             elif pair[0] == "set_motion":
                 if pair[1].isdigit():
-                    if pair[1] in Motions:
+                    if int(pair[1]) in range(len(Motions.list())):
                         settings["states"]["motion"] = int(pair[1])
                         motion = Motions(int(pair[1]))
                         save_settings()
                 else:
                     logging.warning("Expected digits, got %s", pair[1])
+            elif pair[0] == "get_settings":
+                settings_copy = copy.deepcopy(settings)
+                settings_copy.pop("error_format")
+                utils.send_data(settings_copy, ser, "eye_settings.")
         else:
             logging.warning("Expected 2 pairs, got %s", len(pair))
 

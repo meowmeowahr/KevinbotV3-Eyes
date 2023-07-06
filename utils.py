@@ -1,5 +1,8 @@
 from PIL import ImageColor
 
+import json
+import serial
+
 def shift_hue(image, hue):
     image_hsv = image.convert('HSV')
 
@@ -55,3 +58,12 @@ def clamp(val, minn, maxn):
     """
     return max(min(maxn, val), minn)
 
+
+def send_data(data: dict, ser: serial.Serial, prefix: str=''):
+    for key, value in data.items():
+        if isinstance(value, dict):
+            send_data(value, ser, prefix=f"{prefix}{key}.")
+        else:
+            serialized_value = json.dumps(value)
+            data = f"{prefix}{key}:{serialized_value}\n"
+            ser.write(data.encode())
