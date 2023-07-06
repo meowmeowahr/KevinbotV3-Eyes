@@ -65,5 +65,5 @@ def send_data(data: dict, ser: serial.Serial, prefix: str=''):
             send_data(value, ser, prefix=f"{prefix}{key}.")
         else:
             serialized_value = json.dumps(value)
-            data = f"{prefix}{key}:{serialized_value}\n"
+            data = f"{prefix}{key}={serialized_value}\n"
             ser.write(data.encode())

@@ -9,7 +9,7 @@
     "flash_speed": 0.5
   },
   "states": {
-    "page": 5,
+    "page": 3,
     "motion": 1,
     "error": 0
   },
@@ -37,8 +37,8 @@
   },
   "skins": {
     "simple": {
-      "bg_color": "#0022ff",
-      "iris_color": "#ffffff",
+      "bg_color": "#0022FF",
+      "iris_color": "#FFFFFF",
       "pupil_color": "#000000",
       "iris_size": 100,
       "pupil_size": 80
