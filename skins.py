@@ -11,7 +11,6 @@ from PIL import Image, ImageDraw
 import utils
 
 metal_iris = Image.open("iris.png")
-neon1 = Image.open("neon1.png")
 aluminum = Image.open("aluminum.png")
 
 
@@ -97,7 +96,8 @@ def eye_neon_style(display: Display,
         draw.rectangle((0, 0, size[0], size[1]),
                        fill=settings["skins"]["neon"]["bg_color"])
 
-        iris = neon1.resize(
+        iris_image = Image.open(settings["skins"]["neon"]["style"])
+        iris = iris_image.resize(
             (settings["skins"]["neon"]["iris_size"],
              settings["skins"]["neon"]["iris_size"]),
              Image.ANTIALIAS)

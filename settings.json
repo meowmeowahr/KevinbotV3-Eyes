@@ -9,7 +9,7 @@
     "flash_speed": 0.5
   },
   "states": {
-    "page": 3,
+    "page": 5,
     "motion": 1,
     "error": 0
   },
@@ -52,7 +52,8 @@
       "bg_color": "#000000",
       "iris_size": 100,
       "fg_color_start": "#0090ff",
-      "fg_color_end": "#9000ff"
+      "fg_color_end": "#9000ff",
+      "style": "neon2.png"
     }
   }
 }
