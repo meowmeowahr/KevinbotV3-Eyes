@@ -14,6 +14,7 @@ import board
 import digitalio
 import numpy as np
 from adafruit_rgb_display import st7789
+from gpiozero import PWMLED
 from PIL import Image, ImageDraw, ImageFont
 import serial
 
@@ -109,9 +110,10 @@ eye_y = 120
 cs_pin = digitalio.DigitalInOut(board.CE0)
 dc_pin = digitalio.DigitalInOut(board.D25)
 reset_pin = digitalio.DigitalInOut(board.D24)
+bl_pin = 21
 
 spi = board.SPI()
-
+backlight = PWMLED(bl_pin)
 disp = st7789.ST7789(
     spi,
     height=240,
@@ -365,6 +367,11 @@ def serial_loop():
                 settings_copy = copy.deepcopy(settings)
                 settings_copy.pop("error_format")
                 utils.send_data(settings_copy, ser, "eye_settings.")
+            elif pair[0] == "set_backlight":
+                if pair[1].isdigit():
+                    backlight.value = int(pair[1]) / 100
+                    settings["display"]["backlight"] = int(pair[1])
+                    save_settings()
         else:
             logging.warning("Expected 2 pairs, got %s", len(pair))
 
@@ -372,6 +379,8 @@ def serial_loop():
 if __name__ == "__main__":
     logging.basicConfig()
     ser = serial.Serial(SERIAL_PORT, SERIAL_BAUD)
+
+    backlight.value = settings["display"]["backlight"] / 100
 
     create_logo()
     time.sleep(settings["images"]["logo_time"])

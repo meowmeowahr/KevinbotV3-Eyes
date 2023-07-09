@@ -18,7 +18,8 @@
     "logo_time": 2
   },
   "display": {
-    "speed": 80000000
+    "speed": 80000000,
+    "backlight": 100
   },
   "motions": {
     "jump_time": 0.8,
@@ -37,11 +38,11 @@
   },
   "skins": {
     "simple": {
-      "bg_color": "#0022FF",
-      "iris_color": "#FFFFFF",
+      "bg_color": "#FFFFFF",
+      "iris_color": "#0022FF",
       "pupil_color": "#000000",
       "iris_size": 100,
-      "pupil_size": 80
+      "pupil_size": 54
     },
     "metal": {
       "bg_color": "#ffffff",
@@ -53,7 +54,7 @@
       "iris_size": 100,
       "fg_color_start": "#0090ff",
       "fg_color_end": "#9000ff",
-      "style": "neon2.png"
+      "style": "neon1.png"
     }
   }
 }
