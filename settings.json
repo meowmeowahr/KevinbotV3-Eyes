@@ -10,7 +10,7 @@
   },
   "states": {
     "page": 5,
-    "motion": 1,
+    "motion": 2,
     "error": 0
   },
   "images": {
@@ -22,7 +22,7 @@
     "backlight": 100
   },
   "motions": {
-    "jump_time": 0.8,
+    "speed": 70,
     "left_point": [
       80,
       120
@@ -38,22 +38,22 @@
   },
   "skins": {
     "simple": {
-      "bg_color": "#FFFFFF",
-      "iris_color": "#0022FF",
+      "bg_color": "#0022FF",
+      "iris_color": "#FFFFFF",
       "pupil_color": "#000000",
       "iris_size": 100,
-      "pupil_size": 54
+      "pupil_size": 79
     },
     "metal": {
       "bg_color": "#ffffff",
       "iris_size": 150,
-      "tint": 160
+      "tint": 81
     },
     "neon": {
       "bg_color": "#000000",
       "iris_size": 100,
-      "fg_color_start": "#0090ff",
-      "fg_color_end": "#9000ff",
+      "fg_color_start": "#FF00FF",
+      "fg_color_end": "#00FFFF",
       "style": "neon1.png"
     }
   }

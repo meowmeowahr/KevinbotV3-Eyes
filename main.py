@@ -237,9 +237,11 @@ def eye_motion():
 
             start_x = eye_x
             end_x = target_point[0]
-            num_steps = 200
+            num_steps = utils.map_range(settings["motions"]["speed"], 0, 100, 620, 20)
+            print(num_steps)
 
-            for step in range(num_steps + 1):
+            step = 0
+            while step < num_steps + 1:
                 t = step / num_steps
                 easing_t = cubic_in_out(t)
 
@@ -250,6 +252,8 @@ def eye_motion():
                     break
 
                 time.sleep(0.01)
+                num_steps = utils.map_range(settings["motions"]["speed"], 0, 100, 620, 20)
+                step += 1
 
             if eye_x == target_point[0]:
                 if motion_segment == MotionSegment.LEFT:
@@ -260,7 +264,7 @@ def eye_motion():
             current_time = time.time()
             elapsed_time = current_time - previous_time
 
-            if elapsed_time >= settings["motions"]["jump_time"]:
+            if elapsed_time >= utils.map_range(settings["motions"]["speed"], 0, 100, 6.2, 0.2):
                 previous_time = current_time
 
                 if motion_segment == MotionSegment.LEFT:
@@ -371,6 +375,10 @@ def serial_loop():
                 if pair[1].isdigit():
                     backlight.value = int(pair[1]) / 100
                     settings["display"]["backlight"] = int(pair[1])
+                    save_settings()
+            elif pair[0] == "set_speed":
+                if pair[1].isdigit():
+                    settings["motions"]["speed"] = int(pair[1])
                     save_settings()
         else:
             logging.warning("Expected 2 pairs, got %s", len(pair))
