@@ -22,7 +22,7 @@
     "backlight": 100
   },
   "motions": {
-    "speed": 70,
+    "speed": 50,
     "left_point": [
       80,
       120

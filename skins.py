@@ -14,7 +14,7 @@ metal_iris = Image.open("iris.png")
 aluminum = Image.open("aluminum.png")
 
 
-def eye_simple_style(display: Display,
+def eye_simple_style(displays: tuple[Display],
                      last_redraw,
                      settings,
                      pos: iter=(120,120),
@@ -43,11 +43,12 @@ def eye_simple_style(display: Display,
                       eye_y + settings["skins"]["simple"]["pupil_size"] // 2),
                      fill=settings["skins"]["simple"]["pupil_color"])
 
-        display.image(image)
+        for disp in displays:
+            disp.image(image)
         last_redraw = time.time()
 
 
-def eye_metallic_style(display: Display,
+def eye_metallic_style(displays: tuple[Display],
                        last_redraw,
                        settings,
                        pos: iter=(120,120),
@@ -75,11 +76,12 @@ def eye_metallic_style(display: Display,
         image.paste(shifted_iris, (int(eye_x - iris.width // 2),
                                    int(eye_y - iris.height // 2)), iris)
 
-        display.image(image)
+        for disp in displays:
+            disp.image(image)
         last_redraw = time.time()
 
 
-def eye_neon_style(display: Display,
+def eye_neon_style(displays: tuple[Display],
                    last_redraw,
                    settings,
                    pos: iter=(120,120),
@@ -114,5 +116,6 @@ def eye_neon_style(display: Display,
         image.paste(shifted_iris, (int(eye_x - iris.width // 2),
                                    int(eye_y - iris.height // 2)), iris)
 
-        display.image(image)
+        for disp in displays:
+            disp.image(image)
         last_redraw = time.time()

@@ -12,6 +12,7 @@ import copy
 
 import board
 import digitalio
+import busio
 import numpy as np
 from adafruit_rgb_display import st7789
 from gpiozero import PWMLED
@@ -107,30 +108,47 @@ eye_x = 120
 eye_y = 120
 
 # Init display
-cs_pin = digitalio.DigitalInOut(board.CE0)
-dc_pin = digitalio.DigitalInOut(board.D25)
-reset_pin = digitalio.DigitalInOut(board.D24)
-bl_pin = 21
+display_1_cs = digitalio.DigitalInOut(board.CE0)
+display_1_dc = digitalio.DigitalInOut(board.D25)
+display_1_rt = digitalio.DigitalInOut(board.D24)
 
-spi = board.SPI()
+display_2_cs = digitalio.DigitalInOut(board.CE1)
+display_2_dc = digitalio.DigitalInOut(board.D23)
+display_2_rt = digitalio.DigitalInOut(board.D22)
+
+bl_pin = 12
+
+spi_0 = busio.SPI(clock=board.SCK, MOSI=board.MOSI)
+spi_1 = busio.SPI(clock=board.SCK_1, MOSI=board.MOSI_1)
 backlight = PWMLED(bl_pin)
-disp = st7789.ST7789(
-    spi,
+display_0 = st7789.ST7789(
+    spi_0,
     height=240,
     y_offset=80,
     rotation=180,
-    cs=cs_pin,
-    dc=dc_pin,
-    rst=reset_pin,
+    cs=display_1_cs,
+    dc=display_1_dc,
+    rst=display_1_rt,
     baudrate=settings["display"]["speed"],
 )
 
-if disp.rotation % 180 == 90:
-    height = disp.width  # we swap height/width to rotate it to landscape!
-    width = disp.height
+display_1 = st7789.ST7789(
+    spi_1,
+    height=240,
+    y_offset=80,
+    rotation=180,
+    cs=display_2_cs,
+    dc=display_2_dc,
+    rst=display_2_rt,
+    baudrate=settings["display"]["speed"],
+)
+
+if display_0.rotation % 180 == 90:
+    height = display_0.width  # we swap height/width to rotate it to landscape!
+    width = display_0.height
 else:
-    width = disp.width  # we swap height/width to rotate it to landscape!
-    height = disp.height
+    width = display_0.width  # we swap height/width to rotate it to landscape!
+    height = display_0.height
 
 
 def save_settings():
@@ -148,7 +166,8 @@ def create_logo():
     previous_state = state_watcher.state
     state_watcher.state = States.STATE_LOGO
     image = Image.open(settings["images"]["logo"])
-    disp.image(image)
+    display_0.image(image)
+    display_1.image(image)
     state_watcher.state = previous_state
 
 
@@ -187,7 +206,8 @@ def error_periodic(error=0):
             fill=settings["error_format"]["color"]
         )
 
-        disp.image(image)
+        display_0.image(image)
+        display_1.image(image)
         last_redraw = time.time()
 
 
@@ -199,7 +219,7 @@ def tv_static_periodic():
 
         random_pixels = np.random.randint(
             0, 256,
-            size=(disp.width // 2, disp.height // 2, 3),
+            size=(display_0.width // 2, display_0.height // 2, 3),
             dtype=np.uint8)
 
         # Repeat each pixel to form 2x2 blocks
@@ -208,7 +228,8 @@ def tv_static_periodic():
         # Create a PIL Image from the numpy array
         image = Image.fromarray(static)
 
-        disp.image(image)
+        display_0.image(image)
+        display_1.image(image)
         last_redraw = time.time()
 
 
@@ -300,13 +321,13 @@ def main_loop():
             tv_static_periodic()
         elif state_watcher.state == States.STATE_EYE_SIMPLE:
             skins.eye_simple_style(
-                disp, last_redraw, settings, (eye_x, eye_y), (width, height))
+                (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
         elif state_watcher.state == States.STATE_EYE_METAL:
             skins.eye_metallic_style(
-                disp, last_redraw, settings, (eye_x, eye_y), (width, height))
+                (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
         elif state_watcher.state == States.STATE_EYE_NEON:
             skins.eye_neon_style(
-                disp, last_redraw, settings, (eye_x, eye_y), (width, height))
+                (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
         time.sleep(0.001)
 
 
