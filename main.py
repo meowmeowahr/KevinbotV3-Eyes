@@ -116,7 +116,7 @@ display_2_cs = digitalio.DigitalInOut(board.CE1)
 display_2_dc = digitalio.DigitalInOut(board.D23)
 display_2_rt = digitalio.DigitalInOut(board.D22)
 
-bl_pin = 12
+bl_pin = 16
 
 spi_0 = busio.SPI(clock=board.SCK, MOSI=board.MOSI)
 spi_1 = busio.SPI(clock=board.SCK_1, MOSI=board.MOSI_1)
