@@ -44,6 +44,9 @@ class ExtendedEnum(enum.Enum):
     """
     @classmethod
     def list(cls):
+        """
+        Return list of enumerations
+        """
         return list(map(lambda c: c.value, cls))
 
 
@@ -259,7 +262,6 @@ def eye_motion():
             start_x = eye_x
             end_x = target_point[0]
             num_steps = utils.map_range(settings["motions"]["speed"], 0, 100, 620, 20)
-            print(num_steps)
 
             step = 0
             while step < num_steps + 1:
@@ -314,6 +316,10 @@ def eye_motion():
 
 
 def main_loop():
+    """
+    Display loop
+    Update displays with skin
+    """
     while True:
         if state_watcher.state == States.STATE_ERROR:
             error_periodic(settings["states"]["error"])
