@@ -334,6 +334,11 @@ def main_loop():
 def serial_loop():
     global motion
 
+    # send settings on start
+    settings_copy = copy.deepcopy(settings)
+    settings_copy.pop("error_format")
+    utils.send_data(settings_copy, ser, "eye_settings.")
+
     while True:
         data = ser.readline().decode("UTF-8")
         pair = data.strip("\r\n").split("=")
