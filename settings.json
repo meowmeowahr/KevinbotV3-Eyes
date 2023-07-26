@@ -10,7 +10,7 @@
   },
   "states": {
     "page": 5,
-    "motion": 2,
+    "motion": 1,
     "error": 0
   },
   "images": {
@@ -18,11 +18,11 @@
     "logo_time": 2
   },
   "display": {
-    "speed": 80000000,
-    "backlight": 100
+    "speed": 60000000,
+    "backlight": 39
   },
   "motions": {
-    "speed": 50,
+    "speed": 59,
     "left_point": [
       80,
       120
@@ -52,8 +52,8 @@
     "neon": {
       "bg_color": "#000000",
       "iris_size": 100,
-      "fg_color_start": "#FF00FF",
-      "fg_color_end": "#00FFFF",
+      "fg_color_start": "#FF0000",
+      "fg_color_end": "#FFFFFF",
       "style": "neon1.png"
     }
   }
