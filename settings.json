@@ -22,7 +22,7 @@
     "backlight": 100
   },
   "motions": {
-    "speed": 59,
+    "speed": 76,
     "left_point": [
       80,
       120
@@ -34,6 +34,10 @@
     "right_point": [
       160,
       120
+    ],
+    "pos": [
+      121,
+      121
     ]
   },
   "skins": {

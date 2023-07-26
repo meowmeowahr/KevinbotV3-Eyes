@@ -247,7 +247,7 @@ def cubic_in_out(t):
 
 
 def eye_motion():
-    global eye_x
+    global eye_x, eye_y
     motion_segment = MotionSegment.RIGHT
     previous_time = time.time()
     while True:
@@ -270,6 +270,7 @@ def eye_motion():
 
                 x = start_x + (end_x - start_x) * easing_t
                 eye_x = x
+                eye_y = 120
 
                 if motion != Motions.LEFT_RIGHT:
                     break
@@ -283,7 +284,7 @@ def eye_motion():
                     motion_segment = MotionSegment.RIGHT
                 elif motion_segment == MotionSegment.RIGHT:
                     motion_segment = MotionSegment.LEFT
-        if motion == Motions.JUMP:
+        elif motion == Motions.JUMP:
             current_time = time.time()
             elapsed_time = current_time - previous_time
 
@@ -300,6 +301,7 @@ def eye_motion():
                 start_x = eye_x
                 end_x = target_point[0]
                 eye_x = end_x
+                eye_y = 120
 
                 if eye_x == target_point[0]:
                     if motion_segment == MotionSegment.LEFT:
@@ -310,9 +312,13 @@ def eye_motion():
                         motion_segment = MotionSegment.RIGHT
                     elif motion_segment == MotionSegment.CENTER_FROM_RIGHT:
                         motion_segment = MotionSegment.LEFT
+        elif motion == Motions.MANUAL:
+            eye_x, eye_y = settings["motions"]["pos"]
+            time.sleep(0.01)
 
-            else:
-                time.sleep(0.05)
+        else:
+            time.sleep(0.05)
+
 
 
 def main_loop():
@@ -347,7 +353,7 @@ def serial_loop():
 
     while True:
         data = ser.readline().decode("UTF-8")
-        pair = data.strip("\r\n").split("=")
+        pair = data.strip("\r\n").split("=", 1)
         print(pair)
         if len(pair) == 2:
             if pair[0] == "set_state":
@@ -412,6 +418,11 @@ def serial_loop():
                 if pair[1].isdigit():
                     settings["motions"]["speed"] = int(pair[1])
                     save_settings()
+            elif pair[0] == "set_position":
+                coord = pair[1].split(",", 1)
+                settings["motions"]["pos"] = [int(coord[0]), int(coord[1])]
+                save_settings()
+                
         else:
             logging.warning("Expected 2 pairs, got %s", len(pair))
 
