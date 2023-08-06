@@ -9,8 +9,8 @@
     "flash_speed": 0.5
   },
   "states": {
-    "page": 3,
-    "motion": 3,
+    "page": 5,
+    "motion": 1,
     "error": 0
   },
   "images": {
@@ -18,11 +18,11 @@
     "logo_time": 2
   },
   "display": {
-    "speed": 60000000,
+    "speed": 80000000,
     "backlight": 100
   },
   "motions": {
-    "speed": 76,
+    "speed": 85,
     "left_point": [
       80,
       120
@@ -36,8 +36,8 @@
       120
     ],
     "pos": [
-      121,
-      121
+      124,
+      138
     ]
   },
   "skins": {
@@ -56,8 +56,8 @@
     "neon": {
       "bg_color": "#000000",
       "iris_size": 100,
-      "fg_color_start": "#FF0000",
-      "fg_color_end": "#FFFFFF",
+      "fg_color_start": "#0000FF",
+      "fg_color_end": "#FF0000",
       "style": "neon1.png"
     }
   }

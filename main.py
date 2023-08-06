@@ -103,6 +103,7 @@ class StateWatcher:
 
 
 last_redraw = time.time()
+previous_time = time.time()
 error_border_visible = True
 state_watcher = StateWatcher()
 motion = Motions(settings["states"]["motion"])
@@ -247,9 +248,8 @@ def cubic_in_out(t):
 
 
 def eye_motion():
-    global eye_x, eye_y
+    global eye_x, eye_y, previous_time
     motion_segment = MotionSegment.RIGHT
-    previous_time = time.time()
     while True:
         if motion == Motions.LEFT_RIGHT:
             if motion_segment == MotionSegment.LEFT:
@@ -279,7 +279,7 @@ def eye_motion():
                 num_steps = utils.map_range(settings["motions"]["speed"], 0, 100, 620, 20)
                 step += 1
 
-            if eye_x == target_point[0]:
+            if round(eye_x) == target_point[0]:
                 if motion_segment == MotionSegment.LEFT:
                     motion_segment = MotionSegment.RIGHT
                 elif motion_segment == MotionSegment.RIGHT:
@@ -288,7 +288,7 @@ def eye_motion():
             current_time = time.time()
             elapsed_time = current_time - previous_time
 
-            if elapsed_time >= utils.map_range(settings["motions"]["speed"], 0, 100, 6.2, 0.2):
+            if elapsed_time >= utils.map_range(settings["motions"]["speed"], 0, 100, 6.2, 0.1):
                 previous_time = current_time
 
                 if motion_segment == MotionSegment.LEFT:
@@ -303,7 +303,7 @@ def eye_motion():
                 eye_x = end_x
                 eye_y = 120
 
-                if eye_x == target_point[0]:
+                if round(eye_x) == target_point[0]:
                     if motion_segment == MotionSegment.LEFT:
                         motion_segment = MotionSegment.CENTER_FROM_LEFT
                     elif motion_segment == MotionSegment.RIGHT:
@@ -312,6 +312,10 @@ def eye_motion():
                         motion_segment = MotionSegment.RIGHT
                     elif motion_segment == MotionSegment.CENTER_FROM_RIGHT:
                         motion_segment = MotionSegment.LEFT
+                    else:
+                        motion_segment = MotionSegment.CENTER_FROM_LEFT
+            else:
+                time.sleep(0.01)
         elif motion == Motions.MANUAL:
             eye_x, eye_y = settings["motions"]["pos"]
             time.sleep(0.01)
@@ -340,11 +344,11 @@ def main_loop():
         elif state_watcher.state == States.STATE_EYE_NEON:
             skins.eye_neon_style(
                 (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
-        time.sleep(0.001)
+        time.sleep(0.033) # 30fps
 
 
 def serial_loop():
-    global motion
+    global motion, previous_time
 
     # send settings on start
     settings_copy = copy.deepcopy(settings)
@@ -362,6 +366,7 @@ def serial_loop():
                         int(pair[1]), 1, len(States.list()))
                     state_watcher.state = States(settings["states"]["page"])
                     save_settings()
+                    previous_time = time.time()
             elif pair[0] == "set_error":
                 if pair[1].isdigit():
                     settings["states"]["error"] = int(pair[1])
