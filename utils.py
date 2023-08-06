@@ -49,7 +49,7 @@ def blend_colors(color1, color2, weight):
 
 
 def map_range(x, in_min, in_max, out_min, out_max):
-    return (x - in_min) * (out_max - out_min) // (in_max - in_min) + out_min
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 
 def clamp(val, minn, maxn):

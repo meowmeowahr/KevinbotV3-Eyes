@@ -18,11 +18,11 @@
     "logo_time": 2
   },
   "display": {
-    "speed": 80000000,
-    "backlight": 100
+    "speed": 60000000,
+    "backlight": 55
   },
   "motions": {
-    "speed": 85,
+    "speed": 91,
     "left_point": [
       80,
       120
@@ -36,8 +36,8 @@
       120
     ],
     "pos": [
-      124,
-      138
+      0,
+      117
     ]
   },
   "skins": {

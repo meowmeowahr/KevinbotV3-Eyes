@@ -284,11 +284,14 @@ def eye_motion():
                     motion_segment = MotionSegment.RIGHT
                 elif motion_segment == MotionSegment.RIGHT:
                     motion_segment = MotionSegment.LEFT
+                else:
+                    motion_segment = MotionSegment.LEFT
         elif motion == Motions.JUMP:
             current_time = time.time()
             elapsed_time = current_time - previous_time
 
-            if elapsed_time >= utils.map_range(settings["motions"]["speed"], 0, 100, 6.2, 0.1):
+            if elapsed_time >= utils.map_range(settings["motions"]["speed"], 0, 100, 6.20, 0.10):
+                print(utils.map_range(settings["motions"]["speed"], 0, 100, 6.20, 0.10))
                 previous_time = current_time
 
                 if motion_segment == MotionSegment.LEFT:
@@ -344,7 +347,7 @@ def main_loop():
         elif state_watcher.state == States.STATE_EYE_NEON:
             skins.eye_neon_style(
                 (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
-        time.sleep(0.033) # 30fps
+        time.sleep(0.022) # 45fps
 
 
 def serial_loop():
