@@ -15,7 +15,8 @@ import digitalio
 import busio
 import numpy as np
 from adafruit_rgb_display import st7789
-from gpiozero import PWMLED
+from gpiozero import PWMLED, Device
+from gpiozero.pins.rpigpio import RPiGPIOFactory
 from PIL import Image, ImageDraw, ImageFont
 import serial
 
@@ -23,9 +24,9 @@ from assets import AssetManager
 import skins
 import utils
 
-
-SERIAL_PORT = "/dev/ttyS0"
-SERIAL_BAUD = 115200
+# Change the default pin factory for gpiozero
+# Since there are some issues with the default lgpio factory, I am switching back to the RPi.GPIO factory
+Device.pin_factory = RPiGPIOFactory()
 
 with open("settings.json", "r", encoding="UTF-8") as f:
     settings = json.load(f)
