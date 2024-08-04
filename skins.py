@@ -9,11 +9,11 @@ import time
 from adafruit_rgb_display.rgb import Display
 from PIL import Image, ImageDraw
 
+from assets import AssetManager
 import utils
 
-metal_iris = Image.open("assets/metal/iris.png")
-aluminum = Image.open("assets/metal/aluminum.png")
 
+assets = AssetManager()
 
 def eye_simple_style(
     displays: tuple[Display],
@@ -81,7 +81,7 @@ def eye_metallic_style(
             (0, 0, size[0], size[1]), fill=settings["skins"]["metal"]["bg_color"]
         )
 
-        iris = metal_iris.resize(
+        iris = assets.iris.resize(
             (
                 settings["skins"]["metal"]["iris_size"],
                 settings["skins"]["metal"]["iris_size"],
@@ -89,7 +89,7 @@ def eye_metallic_style(
         )
         shifted_iris = utils.shift_hue(iris, settings["skins"]["metal"]["tint"])
 
-        image.paste(aluminum.resize((size[0], size[1])), (0, 0))
+        image.paste(assets.aluminum.resize((size[0], size[1])), (0, 0))
 
         image.paste(
             shifted_iris,

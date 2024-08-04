@@ -21,8 +21,7 @@
     "motion": 1,
     "error": 0
   },
-  "images": {
-    "logo": "assets/logo.png",
+  "logo_format": {
     "logo_time": 2
   },
   "display": {

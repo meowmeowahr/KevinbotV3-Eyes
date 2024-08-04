@@ -19,6 +19,7 @@ from gpiozero import PWMLED
 from PIL import Image, ImageDraw, ImageFont
 import serial
 
+from assets import AssetManager
 import skins
 import utils
 
@@ -123,6 +124,7 @@ class StateWatcher:
         self._state = val
 
 
+assets = AssetManager()
 last_redraw = time.time()
 previous_time = time.time()
 error_border_visible = True
@@ -188,7 +190,7 @@ def create_logo():
     """
     Show Kevinbot v3 Logo on screen
     """
-    image = Image.open(settings["images"]["logo"])
+    image = assets.logo
     display_0.image(image)
     display_1.image(image)
 
@@ -410,7 +412,7 @@ def main_loop():
     while True:
         if state_watcher.state == State.LOGO:
             create_logo()
-            if time.time() - start_time > settings["images"]["logo_time"]:
+            if time.time() - start_time > settings["logo_format"]["logo_time"]:
                 state_watcher.state = State.WAIT
         elif state_watcher.state == State.WAIT:
             create_loading()
