@@ -3,6 +3,7 @@ Skins for Kevinbot v3 Eyes
 Author: Kevin Ahr
 """
 
+import os
 import time
 
 from adafruit_rgb_display.rgb import Display
@@ -10,8 +11,8 @@ from PIL import Image, ImageDraw
 
 import utils
 
-metal_iris = Image.open("iris.png")
-aluminum = Image.open("aluminum.png")
+metal_iris = Image.open("assets/metal/iris.png")
+aluminum = Image.open("assets/metal/aluminum.png")
 
 
 def eye_simple_style(
@@ -121,7 +122,7 @@ def eye_neon_style(
             (0, 0, size[0], size[1]), fill=settings["skins"]["neon"]["bg_color"]
         )
 
-        iris_image = Image.open(settings["skins"]["neon"]["style"])
+        iris_image = Image.open(os.path.join("assets", "neon", settings["skins"]["neon"]["style"]))
         iris = iris_image.resize(
             (
                 settings["skins"]["neon"]["iris_size"],
