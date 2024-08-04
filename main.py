@@ -42,6 +42,7 @@ class ExtendedEnum(enum.Enum):
     Extended Enum Class
     Adds list() function
     """
+
     @classmethod
     def list(cls):
         """
@@ -54,15 +55,18 @@ class VisualPage(ExtendedEnum):
     """
     Page excluding special pages of display
     """
+
     STATE_TV_STATIC = 0
     STATE_EYE_SIMPLE = 1
     STATE_EYE_METAL = 2
     STATE_EYE_NEON = 3
 
+
 class State(ExtendedEnum):
     """
     State of display
     """
+
     LOGO = 0
     WAIT = 1
     ERORR = 2
@@ -73,6 +77,7 @@ class Motions(ExtendedEnum):
     """
     Animations for display
     """
+
     DISABLE = 0
     LEFT_RIGHT = 1
     JUMP = 2
@@ -83,6 +88,7 @@ class MotionSegment(enum.Enum):
     """
     Segments of animation
     """
+
     CENTER_FROM_LEFT = 0
     CENTER_FROM_RIGHT = 1
     LEFT = 2
@@ -96,9 +102,8 @@ class StateWatcher:
 
     def __init__(self):
         self._page = VisualPage(
-            clamp(
-                settings["states"]["page"], 1, len(
-                    VisualPage.list())))
+            clamp(settings["states"]["page"], 1, len(VisualPage.list()))
+        )
         self._state = State.LOGO
 
     @property
@@ -109,7 +114,6 @@ class StateWatcher:
     def visual_page(self, val):
         self._page = val
 
-    
     @property
     def state(self):
         return self._state
@@ -176,7 +180,7 @@ def save_settings():
     """
     Save settings.json
     """
-    with open('settings.json', 'w', encoding="UTF-8") as file:
+    with open("settings.json", "w", encoding="UTF-8") as file:
         json.dump(settings, file, indent=2)
 
 
@@ -196,27 +200,28 @@ def create_loading():
     image = Image.new("RGB", (width, height))
     draw = ImageDraw.Draw(image)
 
-    draw.rectangle((0, 0, width, height),
-                    fill=settings["loading_format"]["color"])
+    draw.rectangle((0, 0, width, height), fill=settings["loading_format"]["color"])
 
     draw.rectangle(
-        (settings["loading_format"]["border"],
+        (
+            settings["loading_format"]["border"],
             settings["loading_format"]["border"],
             width - settings["loading_format"]["border"] - 1,
-            height - settings["loading_format"]["border"] - 1),
-        fill=settings["loading_format"]["bg_color"]
+            height - settings["loading_format"]["border"] - 1,
+        ),
+        fill=settings["loading_format"]["bg_color"],
     )
 
-    font = ImageFont.truetype(settings["loading_format"]["font"],
-                                settings["loading_format"]["font_size"])
-    (_, _, font_width, font_height) = font.getbbox(
-        settings["loading_format"]["text"])
+    font = ImageFont.truetype(
+        settings["loading_format"]["font"], settings["loading_format"]["font_size"]
+    )
+    (_, _, font_width, font_height) = font.getbbox(settings["loading_format"]["text"])
 
     draw.text(
         (width // 2 - font_width // 2, height // 2 - font_height // 2),
         settings["loading_format"]["text"].format("error"),
         font=font,
-        fill=settings["loading_format"]["color"]
+        fill=settings["loading_format"]["color"],
     )
 
     display_0.image(image)
@@ -232,30 +237,36 @@ def error_periodic(error=0):
 
         error_border_visible = not error_border_visible
         if error_border_visible:
-            draw.rectangle((0, 0, width, height),
-                           fill=settings["error_format"]["color"])
+            draw.rectangle(
+                (0, 0, width, height), fill=settings["error_format"]["color"]
+            )
         else:
-            draw.rectangle((0, 0, width, height),
-                           fill=settings["error_format"]["bg_color"])
+            draw.rectangle(
+                (0, 0, width, height), fill=settings["error_format"]["bg_color"]
+            )
 
         draw.rectangle(
-            (settings["error_format"]["border"],
-             settings["error_format"]["border"],
-             width - settings["error_format"]["border"] - 1,
-             height - settings["error_format"]["border"] - 1),
-            fill=settings["error_format"]["bg_color"]
+            (
+                settings["error_format"]["border"],
+                settings["error_format"]["border"],
+                width - settings["error_format"]["border"] - 1,
+                height - settings["error_format"]["border"] - 1,
+            ),
+            fill=settings["error_format"]["bg_color"],
         )
 
-        font = ImageFont.truetype(settings["error_format"]["font"],
-                                  settings["error_format"]["font_size"])
+        font = ImageFont.truetype(
+            settings["error_format"]["font"], settings["error_format"]["font_size"]
+        )
         (_, _, font_width, font_height) = font.getbbox(
-            settings["error_format"]["text"].format(error))
+            settings["error_format"]["text"].format(error)
+        )
 
         draw.text(
             (width // 2 - font_width // 2, height // 2 - font_height // 2),
             settings["error_format"]["text"].format(error),
             font=font,
-            fill=settings["error_format"]["color"]
+            fill=settings["error_format"]["color"],
         )
 
         display_0.image(image)
@@ -270,9 +281,11 @@ def tv_static_periodic():
         image = Image.new("RGB", (width, height))
 
         random_pixels = np.random.randint(
-            0, 256,
+            0,
+            256,
             size=(display_0.width // 2, display_0.height // 2, 3),
-            dtype=np.uint8)
+            dtype=np.uint8,
+        )
 
         # Repeat each pixel to form 2x2 blocks
         static = np.repeat(np.repeat(random_pixels, 2, axis=0), 2, axis=1)
@@ -290,7 +303,7 @@ def cubic_in_out(t):
     CubicInOut Easing Curve
     """
     if t < 0.5:
-        return 4 * t ** 3
+        return 4 * t**3
     else:
         return 1 - (-2 * t + 2) ** 3 / 2
 
@@ -324,7 +337,9 @@ def eye_motion():
                     break
 
                 time.sleep(0.01)
-                num_steps = utils.map_range(settings["motions"]["speed"], 0, 100, 620, 20)
+                num_steps = utils.map_range(
+                    settings["motions"]["speed"], 0, 100, 620, 20
+                )
                 step += 1
 
             if round(eye_x) == target_point[0]:
@@ -338,7 +353,9 @@ def eye_motion():
             current_time = time.time()
             elapsed_time = current_time - previous_time
 
-            if elapsed_time >= utils.map_range(settings["motions"]["speed"], 0, 100, 6.20, 0.10):
+            if elapsed_time >= utils.map_range(
+                settings["motions"]["speed"], 0, 100, 6.20, 0.10
+            ):
                 print(utils.map_range(settings["motions"]["speed"], 0, 100, 6.20, 0.10))
                 previous_time = current_time
 
@@ -381,6 +398,7 @@ def request_handshake():
     """
     ser.write(b"handshake.request\n")
 
+
 def main_loop():
     """
     Display loop
@@ -406,14 +424,29 @@ def main_loop():
                 tv_static_periodic()
             elif state_watcher.visual_page == VisualPage.STATE_EYE_SIMPLE:
                 skins.eye_simple_style(
-                    (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
+                    (display_0, display_1),
+                    last_redraw,
+                    settings,
+                    (eye_x, eye_y),
+                    (width, height),
+                )
             elif state_watcher.visual_page == VisualPage.STATE_EYE_METAL:
                 skins.eye_metallic_style(
-                    (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
+                    (display_0, display_1),
+                    last_redraw,
+                    settings,
+                    (eye_x, eye_y),
+                    (width, height),
+                )
             elif state_watcher.visual_page == VisualPage.STATE_EYE_NEON:
                 skins.eye_neon_style(
-                    (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
-        time.sleep(0.022) # 45fps
+                    (display_0, display_1),
+                    last_redraw,
+                    settings,
+                    (eye_x, eye_y),
+                    (width, height),
+                )
+        time.sleep(0.022)  # 45fps
 
 
 def serial_loop():
@@ -434,7 +467,8 @@ def serial_loop():
             if pair[0] == "setState":
                 if pair[1].isdigit():
                     settings["states"]["page"] = clamp(
-                        int(pair[1]), 1, len(VisualPage.list()))
+                        int(pair[1]), 1, len(VisualPage.list())
+                    )
                     state_watcher.visual_page = VisualPage(settings["states"]["page"])
                     save_settings()
                     previous_time = time.time()
@@ -450,29 +484,27 @@ def serial_loop():
                     else:
                         value = option_pairs[2]
                     if not option_pairs[0] in settings["skins"]:
-                        logging.warning(
-                            "Skin %s does not exist", option_pairs[0])
+                        logging.warning("Skin %s does not exist", option_pairs[0])
                         continue
 
                     if not option_pairs[1] in settings["skins"][option_pairs[0]]:
                         logging.warning(
                             "Option %s for %s does not exist",
                             option_pairs[1],
-                            option_pairs[0])
+                            option_pairs[0],
+                        )
                         continue
 
-                    if type(settings["skins"][option_pairs[0]]
-                            [option_pairs[1]]) in (list, tuple):
-                        logging.warning(
-                            "Cannot change a list or tuple object")
+                    if type(settings["skins"][option_pairs[0]][option_pairs[1]]) in (
+                        list,
+                        tuple,
+                    ):
+                        logging.warning("Cannot change a list or tuple object")
                     else:
-                        settings["skins"][option_pairs[0]
-                                          ][option_pairs[1]] = value
+                        settings["skins"][option_pairs[0]][option_pairs[1]] = value
                         save_settings()
                 else:
-                    logging.warning(
-                        "Expected 3 values, got %s",
-                        len(option_pairs))
+                    logging.warning("Expected 3 values, got %s", len(option_pairs))
             elif pair[0] == "setMotion":
                 if pair[1].isdigit():
                     if int(pair[1]) in range(len(Motions.list())):
@@ -498,7 +530,7 @@ def serial_loop():
                 coord = pair[1].split(",", 1)
                 settings["motions"]["pos"] = [int(coord[0]), int(coord[1])]
                 save_settings()
-                
+
         else:
             logging.warning("Expected 2 pairs, got %s", len(pair))
 

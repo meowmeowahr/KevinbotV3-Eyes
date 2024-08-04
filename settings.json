@@ -14,7 +14,7 @@
     "bg_color": "#000000",
     "font_size": 38,
     "font": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
-    "text": "Loading",
+    "text": "Loading"
   },
   "states": {
     "page": 3,
