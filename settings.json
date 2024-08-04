@@ -1,4 +1,8 @@
 {
+  "comms": {
+    "port": "/dev/ttyS0",
+    "baud": 115200
+  },
   "error_format": {
     "border": 20,
     "color": "#ff1212",
@@ -26,7 +30,7 @@
   },
   "display": {
     "speed": 82000000,
-    "backlight": 41
+    "backlight": 15
   },
   "motions": {
     "speed": 1,

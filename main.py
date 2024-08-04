@@ -540,7 +540,7 @@ def serial_loop():
 
 if __name__ == "__main__":
     logging.basicConfig()
-    ser = serial.Serial(SERIAL_PORT, SERIAL_BAUD)
+    ser = serial.Serial(settings["comms"]["port"], settings["comms"]["baud"])
 
     backlight.value = settings["display"]["backlight"] / 100
 
