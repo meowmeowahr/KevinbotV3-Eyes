@@ -18,8 +18,8 @@
     "logo_time": 2
   },
   "display": {
-    "speed": 60000000,
-    "backlight": 55
+    "speed": 82000000,
+    "backlight": 100
   },
   "motions": {
     "speed": 91,
