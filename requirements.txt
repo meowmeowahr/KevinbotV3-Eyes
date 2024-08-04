@@ -1,0 +1,5 @@
+gpiozero~=2.0.1
+pyserial~=3.5
+Pillow~=10.4.0
+numpy~=2.0.1
+adafruit-circuitpython-rgb-display~=3.12.4

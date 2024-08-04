@@ -102,7 +102,7 @@ def eye_neon_style(displays: tuple[Display],
         iris = iris_image.resize(
             (settings["skins"]["neon"]["iris_size"],
              settings["skins"]["neon"]["iris_size"]),
-             Image.ANTIALIAS)
+             Image.Resampling.LANCZOS)
 
         motion_progress = utils.clamp(utils.map_range(
             eye_x, settings["motions"]["left_point"][0],
