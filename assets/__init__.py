@@ -1,5 +1,6 @@
 from PIL import Image
 
+
 class AssetManager:
     def __init__(self):
         self._logo = Image.open("assets/logo.png")
@@ -13,7 +14,7 @@ class AssetManager:
     @property
     def iris(self) -> Image.Image:
         return self._metal_iris
-    
+
     @property
     def aluminum(self) -> Image.Image:
         return self._aluminum

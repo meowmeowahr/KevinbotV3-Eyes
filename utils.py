@@ -1,3 +1,4 @@
+import enum
 from PIL import ImageColor
 
 import json
@@ -70,3 +71,58 @@ def send_data(data: dict, ser: serial.Serial, prefix: str = ""):
             serialized_value = json.dumps(value)
             data = f"{prefix}{key}={serialized_value}\n"
             ser.write(data.encode())
+
+
+def cubic_in_out(t):
+    """
+    CubicInOut Easing Curve
+    """
+    if t < 0.5:
+        return 4 * t**3
+    else:
+        return 1 - (-2 * t + 2) ** 3 / 2
+
+
+def step_jump_curve(t):
+    """
+    Round input to the nearest 0.5
+    """
+    return round(t * 2) / 2
+
+
+def reflect_mod(value, max_value):
+    """
+    Custom modulo function that starts decreasing after reaching the max value.
+
+    Parameters:
+    value (float): The input value to be adjusted.
+    max_value (float): The maximum value at which the behavior changes.
+
+    Returns:
+    float: The adjusted value.
+    """
+    if max_value <= 0:
+        raise ValueError("max_value must be greater than 0")
+
+    # Calculate the equivalent position in the range [0, 2*max_value]
+    mod_value = value % (2 * max_value)
+
+    # If in the second half, reflect it back
+    if mod_value > max_value:
+        return 2 * max_value - mod_value
+
+    return mod_value
+
+
+class ExtendedIntEnum(enum.IntEnum):
+    """
+    Extended IntEnum Class
+    Adds list() function
+    """
+
+    @classmethod
+    def list(cls):
+        """
+        Return list of enumerations
+        """
+        return list(map(lambda c: c.value, cls))

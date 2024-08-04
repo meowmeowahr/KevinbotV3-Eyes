@@ -29,38 +29,7 @@ import utils
 Device.pin_factory = RPiGPIOFactory()
 
 
-def clamp(val, minn, maxn):
-    """
-    Clamp value to min/max
-    """
-    return max(min(maxn, val), minn)
-
-
-def cubic_in_out(t):
-    """
-    CubicInOut Easing Curve
-    """
-    if t < 0.5:
-        return 4 * t**3
-    else:
-        return 1 - (-2 * t + 2) ** 3 / 2
-
-
-class ExtendedIntEnum(enum.IntEnum):
-    """
-    Extended IntEnum Class
-    Adds list() function
-    """
-
-    @classmethod
-    def list(cls):
-        """
-        Return list of enumerations
-        """
-        return list(map(lambda c: c.value, cls))
-
-
-class VisualPage(ExtendedIntEnum):
+class VisualPage(utils.ExtendedIntEnum):
     """
     Page excluding special pages of display
     """
@@ -114,16 +83,15 @@ class RobotEyes:
         self.last_redraw = time.time()
         self.previous_time = time.time()
         self.error_border_visible = True
-        self.motion = Motions(self.settings["states"]["motion"])
         self.ser = serial.Serial(
             self.settings["comms"]["port"], self.settings["comms"]["baud"]
         )
 
-        self.visual_page = clamp(
+        self.visual_page = utils.clamp(
             self.settings["states"]["page"], 0, len(VisualPage.list())
         )
         self.state = State.LOGO
-        self.motion = Motions.LEFT_RIGHT
+        self.motion = Motions(self.settings["states"]["motion"])
 
         self.eye_x = 120
         self.eye_y = 120
@@ -315,83 +283,48 @@ class RobotEyes:
 
     def eye_motion(self):
         motion_segment = MotionSegment.RIGHT
+        step = 0
         while True:
             if self.motion == Motions.LEFT_RIGHT:
-                if motion_segment == MotionSegment.LEFT:
-                    target_point = self.settings["motions"]["left_point"]
-                elif motion_segment == MotionSegment.RIGHT:
-                    target_point = self.settings["motions"]["right_point"]
-                else:
-                    target_point = self.settings["motions"]["center_point"]
-
-                start_x = self.eye_x
-                end_x = target_point[0]
                 num_steps = utils.map_range(
                     self.settings["motions"]["speed"], 0, 100, 620, 20
                 )
 
-                step = 0
-                while step < num_steps + 1:
-                    t = step / num_steps
-                    easing_t = cubic_in_out(t)
+                self.eye_x = utils.map_range(
+                    utils.cubic_in_out(utils.reflect_mod(step, 1)),
+                    0,
+                    1,
+                    self.settings["motions"]["left_point"][0],
+                    self.settings["motions"]["right_point"][0],
+                )
+                self.eye_y = self.height // 2
 
-                    self.eye_x = start_x + (end_x - start_x) * easing_t
-                    self.eye_y = 120
+                time.sleep(0.01)
+                num_steps = utils.map_range(
+                    self.settings["motions"]["speed"], 0, 100, 620, 20
+                )
+                step += 2 / num_steps
 
-                    if self.motion != Motions.LEFT_RIGHT:
-                        break
-
-                    time.sleep(0.01)
-                    num_steps = utils.map_range(
-                        self.settings["motions"]["speed"], 0, 100, 620, 20
-                    )
-                    step += 1
-
-                if round(self.eye_x) == target_point[0]:
-                    if motion_segment == MotionSegment.LEFT:
-                        motion_segment = MotionSegment.RIGHT
-                    elif motion_segment == MotionSegment.RIGHT:
-                        motion_segment = MotionSegment.LEFT
-                    else:
-                        motion_segment = MotionSegment.LEFT
             elif self.motion == Motions.JUMP:
-                current_time = time.time()
-                elapsed_time = current_time - previous_time
+                num_steps = utils.map_range(
+                    self.settings["motions"]["speed"], 0, 100, 620, 20
+                )
 
-                if elapsed_time >= utils.map_range(
-                    self.settings["motions"]["speed"], 0, 100, 6.20, 0.10
-                ):
-                    print(
-                        utils.map_range(
-                            self.settings["motions"]["speed"], 0, 100, 6.20, 0.10
-                        )
-                    )
-                    previous_time = current_time
+                self.eye_x = utils.map_range(
+                    utils.step_jump_curve(utils.reflect_mod(step, 1)),
+                    0,
+                    1,
+                    self.settings["motions"]["left_point"][0],
+                    self.settings["motions"]["right_point"][0],
+                )
+                self.eye_y = self.height // 2
 
-                    if motion_segment == MotionSegment.LEFT:
-                        target_point = self.settings["motions"]["left_point"]
-                    elif motion_segment == MotionSegment.RIGHT:
-                        target_point = self.settings["motions"]["right_point"]
-                    else:
-                        target_point = self.settings["motions"]["center_point"]
+                time.sleep(0.01)
+                num_steps = utils.map_range(
+                    self.settings["motions"]["speed"], 0, 100, 620, 20
+                )
+                step += 2 / num_steps
 
-                    start_x = self.eye_x
-                    self.eye_x = target_point[0]
-                    self.eye_y = 120
-
-                    if round(eye_x) == target_point[0]:
-                        if motion_segment == MotionSegment.LEFT:
-                            motion_segment = MotionSegment.CENTER_FROM_LEFT
-                        elif motion_segment == MotionSegment.RIGHT:
-                            motion_segment = MotionSegment.CENTER_FROM_RIGHT
-                        elif motion_segment == MotionSegment.CENTER_FROM_LEFT:
-                            motion_segment = MotionSegment.RIGHT
-                        elif motion_segment == MotionSegment.CENTER_FROM_RIGHT:
-                            motion_segment = MotionSegment.LEFT
-                        else:
-                            motion_segment = MotionSegment.CENTER_FROM_LEFT
-                else:
-                    time.sleep(0.01)
             elif self.motion == Motions.MANUAL:
                 self.eye_x, self.eye_y = self.settings["motions"]["pos"]
                 time.sleep(0.01)
@@ -469,7 +402,7 @@ class RobotEyes:
             elif len(pair) == 2:
                 if pair[0] == "setState":
                     if pair[1].isdigit():
-                        self.settings["states"]["page"] = clamp(
+                        self.settings["states"]["page"] = utils.clamp(
                             int(pair[1]), 1, len(VisualPage.list())
                         )
                         self.visual_page = VisualPage(self.settings["states"]["page"])
