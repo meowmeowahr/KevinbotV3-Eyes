@@ -363,18 +363,18 @@ def serial_loop():
         pair = data.strip("\r\n").split("=", 1)
         print(pair)
         if len(pair) == 2:
-            if pair[0] == "set_state":
+            if pair[0] == "setState":
                 if pair[1].isdigit():
                     settings["states"]["page"] = clamp(
                         int(pair[1]), 1, len(States.list()))
                     state_watcher.state = States(settings["states"]["page"])
                     save_settings()
                     previous_time = time.time()
-            elif pair[0] == "set_error":
+            elif pair[0] == "setError":
                 if pair[1].isdigit():
                     settings["states"]["error"] = int(pair[1])
                     save_settings()
-            elif pair[0] == "set_skin_option":
+            elif pair[0] == "setSkinOption":
                 option_pairs = pair[1].split(":")
                 if len(option_pairs) == 3:
                     if option_pairs[2].isdigit():
@@ -405,7 +405,7 @@ def serial_loop():
                     logging.warning(
                         "Expected 3 values, got %s",
                         len(option_pairs))
-            elif pair[0] == "set_motion":
+            elif pair[0] == "setMotion":
                 if pair[1].isdigit():
                     if int(pair[1]) in range(len(Motions.list())):
                         settings["states"]["motion"] = int(pair[1])
@@ -413,20 +413,20 @@ def serial_loop():
                         save_settings()
                 else:
                     logging.warning("Expected digits, got %s", pair[1])
-            elif pair[0] == "get_settings":
+            elif pair[0] == "getSettings":
                 settings_copy = copy.deepcopy(settings)
                 settings_copy.pop("error_format")
-                utils.send_data(settings_copy, ser, "eye_settings.")
-            elif pair[0] == "set_backlight":
+                utils.send_data(settings_copy, ser, "eyeSettings.")
+            elif pair[0] == "setBacklight":
                 if pair[1].isdigit():
                     backlight.value = int(pair[1]) / 100
                     settings["display"]["backlight"] = int(pair[1])
                     save_settings()
-            elif pair[0] == "set_speed":
+            elif pair[0] == "setSpeed":
                 if pair[1].isdigit():
                     settings["motions"]["speed"] = int(pair[1])
                     save_settings()
-            elif pair[0] == "set_position":
+            elif pair[0] == "setPosition":
                 coord = pair[1].split(",", 1)
                 settings["motions"]["pos"] = [int(coord[0]), int(coord[1])]
                 save_settings()
