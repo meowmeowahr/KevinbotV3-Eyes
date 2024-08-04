@@ -50,16 +50,23 @@ class ExtendedEnum(enum.Enum):
         return list(map(lambda c: c.value, cls))
 
 
-class States(ExtendedEnum):
+class VisualPage(ExtendedEnum):
     """
-    States of display
+    Page excluding special pages of display
     """
-    STATE_LOGO = 0
-    STATE_ERROR = 1
-    STATE_TV_STATIC = 2
-    STATE_EYE_SIMPLE = 3
-    STATE_EYE_METAL = 4
-    STATE_EYE_NEON = 5
+    STATE_TV_STATIC = 0
+    STATE_EYE_SIMPLE = 1
+    STATE_EYE_METAL = 2
+    STATE_EYE_NEON = 3
+
+class State(ExtendedEnum):
+    """
+    State of display
+    """
+    LOGO = 0
+    WAIT = 1
+    ERORR = 2
+    HOME = 3
 
 
 class Motions(ExtendedEnum):
@@ -88,11 +95,21 @@ class StateWatcher:
     """
 
     def __init__(self):
-        self._state = States(
+        self._page = VisualPage(
             clamp(
                 settings["states"]["page"], 1, len(
-                    States.list())))
+                    VisualPage.list())))
+        self._state = State.LOGO
 
+    @property
+    def visual_page(self):
+        return self._page
+
+    @visual_page.setter
+    def visual_page(self, val):
+        self._page = val
+
+    
     @property
     def state(self):
         return self._state
@@ -167,12 +184,43 @@ def create_logo():
     """
     Show Kevinbot v3 Logo on screen
     """
-    previous_state = state_watcher.state
-    state_watcher.state = States.STATE_LOGO
     image = Image.open(settings["images"]["logo"])
     display_0.image(image)
     display_1.image(image)
-    state_watcher.state = previous_state
+
+
+def create_loading():
+    """
+    Show loading page while main system connects
+    """
+    image = Image.new("RGB", (width, height))
+    draw = ImageDraw.Draw(image)
+
+    draw.rectangle((0, 0, width, height),
+                    fill=settings["loading_format"]["color"])
+
+    draw.rectangle(
+        (settings["loading_format"]["border"],
+            settings["loading_format"]["border"],
+            width - settings["loading_format"]["border"] - 1,
+            height - settings["loading_format"]["border"] - 1),
+        fill=settings["loading_format"]["bg_color"]
+    )
+
+    font = ImageFont.truetype(settings["loading_format"]["font"],
+                                settings["loading_format"]["font_size"])
+    (_, _, font_width, font_height) = font.getbbox(
+        settings["loading_format"]["text"])
+
+    draw.text(
+        (width // 2 - font_width // 2, height // 2 - font_height // 2),
+        settings["loading_format"]["text"].format("error"),
+        font=font,
+        fill=settings["loading_format"]["color"]
+    )
+
+    display_0.image(image)
+    display_1.image(image)
 
 
 def error_periodic(error=0):
@@ -200,7 +248,7 @@ def error_periodic(error=0):
 
         font = ImageFont.truetype(settings["error_format"]["font"],
                                   settings["error_format"]["font_size"])
-        (font_width, font_height) = font.getsize(
+        (_, _, font_width, font_height) = font.getbbox(
             settings["error_format"]["text"].format(error))
 
         draw.text(
@@ -327,26 +375,44 @@ def eye_motion():
             time.sleep(0.05)
 
 
+def request_handshake():
+    """
+    Send a handshake request to the core
+    """
+    ser.write(b"handshake.request\n")
 
 def main_loop():
     """
     Display loop
     Update displays with skin
     """
+    start_time = time.time()
+    request_handshake()
+    last_handshake_request = time.time()
     while True:
-        if state_watcher.state == States.STATE_ERROR:
+        if state_watcher.state == State.LOGO:
+            create_logo()
+            if time.time() - start_time > settings["images"]["logo_time"]:
+                state_watcher.state = State.WAIT
+        elif state_watcher.state == State.WAIT:
+            create_loading()
+            if time.time() - last_handshake_request > 1:
+                request_handshake()
+                last_handshake_request = time.time()
+        elif state_watcher.state == State.ERORR:
             error_periodic(settings["states"]["error"])
-        elif state_watcher.state == States.STATE_TV_STATIC:
-            tv_static_periodic()
-        elif state_watcher.state == States.STATE_EYE_SIMPLE:
-            skins.eye_simple_style(
-                (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
-        elif state_watcher.state == States.STATE_EYE_METAL:
-            skins.eye_metallic_style(
-                (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
-        elif state_watcher.state == States.STATE_EYE_NEON:
-            skins.eye_neon_style(
-                (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
+        elif state_watcher.state == State.HOME:
+            if state_watcher.visual_page == VisualPage.STATE_TV_STATIC:
+                tv_static_periodic()
+            elif state_watcher.visual_page == VisualPage.STATE_EYE_SIMPLE:
+                skins.eye_simple_style(
+                    (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
+            elif state_watcher.visual_page == VisualPage.STATE_EYE_METAL:
+                skins.eye_metallic_style(
+                    (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
+            elif state_watcher.visual_page == VisualPage.STATE_EYE_NEON:
+                skins.eye_neon_style(
+                    (display_0, display_1), last_redraw, settings, (eye_x, eye_y), (width, height))
         time.sleep(0.022) # 45fps
 
 
@@ -362,12 +428,14 @@ def serial_loop():
         data = ser.readline().decode("UTF-8")
         pair = data.strip("\r\n").split("=", 1)
         print(pair)
-        if len(pair) == 2:
+        if pair[0] == "handshake.complete":
+            state_watcher.state = State.HOME
+        elif len(pair) == 2:
             if pair[0] == "setState":
                 if pair[1].isdigit():
                     settings["states"]["page"] = clamp(
-                        int(pair[1]), 1, len(States.list()))
-                    state_watcher.state = States(settings["states"]["page"])
+                        int(pair[1]), 1, len(VisualPage.list()))
+                    state_watcher.visual_page = VisualPage(settings["states"]["page"])
                     save_settings()
                     previous_time = time.time()
             elif pair[0] == "setError":
@@ -441,13 +509,10 @@ if __name__ == "__main__":
 
     backlight.value = settings["display"]["backlight"] / 100
 
-    create_logo()
-    time.sleep(settings["images"]["logo_time"])
+    serial_thread = threading.Thread(target=serial_loop, daemon=True)
+    serial_thread.start()
 
     motion_thread = threading.Thread(target=eye_motion, daemon=True)
     motion_thread.start()
-
-    serial_thread = threading.Thread(target=serial_loop, daemon=True)
-    serial_thread.start()
 
     main_loop()
