@@ -51,7 +51,7 @@ class State(enum.Enum):
     HOME = 3
 
 
-class Motions(enum.Enum):
+class Motions(utils.ExtendedIntEnum):
     """
     Animations for display
     """
