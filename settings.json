@@ -30,7 +30,8 @@
   },
   "display": {
     "speed": 82000000,
-    "backlight": 100
+    "backlight": 100,
+    "backlight_pin": 16
   },
   "motions": {
     "speed": 78,

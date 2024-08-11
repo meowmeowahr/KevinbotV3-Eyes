@@ -95,8 +95,7 @@ class RobotEyes:
         self.spi_1 = busio.SPI(clock=board.SCK_1, MOSI=board.MOSI_1)
 
         # Init display backlight
-        self.bl_pin = 16
-        self.backlight = PWMLED(self.bl_pin)
+        self.backlight = PWMLED(self.settings["display"]["backlight_pin"])
         self.backlight.value = self.settings["display"]["backlight"] / 100
 
         # Init ST7789 displays
