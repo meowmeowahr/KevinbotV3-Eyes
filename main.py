@@ -361,9 +361,6 @@ class RobotEyes:
                     self.state = State.WAIT
             elif self.state == State.WAIT:
                 self.create_loading()
-                if time.time() - last_handshake_request > 1:
-                    self.request_handshake()
-                    last_handshake_request = time.time()
             elif self.state == State.ERORR:
                 self.error_periodic(self.settings["states"]["error"])
             elif self.state == State.HOME:
@@ -404,6 +401,7 @@ class RobotEyes:
         # send settings on start
         settings_copy = copy.deepcopy(self.settings)
         settings_copy.pop("error_format")
+        settings_copy.pop("loading_format")
         utils.send_data(settings_copy, self.ser, "eye_settings.")
 
         while True:
@@ -415,13 +413,18 @@ class RobotEyes:
             # commands that don't set a value
             if pair[0] == "handshake.complete":
                 self.state = State.HOME
+            elif pair[0] == "resetConnection":
+                self.state = State.WAIT
+            elif pair[0] == "connectionReady":
+                self.request_handshake()
+                last_handshake_request = time.time()
             # comands that do set a value
             elif len(pair) == 2:
                 if pair[0] == "setState":
                     # set visual page of display
                     if pair[1].isdigit():
                         self.settings["states"]["page"] = utils.clamp(
-                            int(pair[1]), 1, len(VisualPage.list())
+                            int(pair[1]), 0, len(VisualPage.list())
                         )
                         self.visual_page = VisualPage(self.settings["states"]["page"])
                         self.save_settings()
@@ -490,6 +493,7 @@ class RobotEyes:
                     # send all settings over serial
                     settings_copy = copy.deepcopy(self.settings)
                     settings_copy.pop("error_format")
+                    settings_copy.pop("loading_format")
                     utils.send_data(settings_copy, self.ser, "eyeSettings.")
                 elif pair[0] == "setBacklight":
                     # set backlight brightness
