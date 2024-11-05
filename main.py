@@ -145,6 +145,9 @@ class RobotEyes:
 
         self.main_loop()
 
+    def exit(self):
+        self.error_periodic(fmt = "{}", error="EXITED")
+
     def save_settings(self):
         """
         Save settings.json
@@ -207,7 +210,7 @@ class RobotEyes:
         self.display_0.image(image)
         self.display_1.image(image)
 
-    def error_periodic(self, error=0):
+    def error_periodic(self, fmt: str = "ERROR {}", error: int = 0):
         # Create image
         image = Image.new("RGB", (self.width, self.height))
         draw = ImageDraw.Draw(image)
@@ -235,7 +238,7 @@ class RobotEyes:
             self.settings["error_format"]["font_size"],
         )
         (_, _, font_width, font_height) = font.getbbox(
-            self.settings["error_format"]["text"].format(error)
+            fmt.format(error)
         )
 
         # Add text
@@ -244,7 +247,7 @@ class RobotEyes:
                 self.width // 2 - font_width // 2,
                 self.height // 2 - font_height // 2,
             ),
-            self.settings["error_format"]["text"].format(error),
+            fmt.format(error),
             font=font,
             fill=self.settings["error_format"]["color"],
         )
@@ -362,7 +365,7 @@ class RobotEyes:
             elif self.state == State.WAIT:
                 self.create_loading()
             elif self.state == State.ERORR:
-                self.error_periodic(self.settings["states"]["error"])
+                self.error_periodic(self.settings["error_format"]["text"], self.settings["states"]["error"])
             elif self.state == State.HOME:
                 # Eye skin state
                 if self.visual_page == VisualPage.STATE_TV_STATIC:
@@ -517,4 +520,7 @@ class RobotEyes:
 if __name__ == "__main__":
     logging.basicConfig()
     eyes = RobotEyes()
-    eyes.run()
+    try:
+        eyes.run()
+    finally:
+        eyes.exit()
