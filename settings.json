@@ -18,11 +18,11 @@
     "bg_color": "#000000",
     "font_size": 38,
     "font": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
-    "text": "CONNECT…"
+    "text": "CONNECT\u2026"
   },
   "states": {
     "page": 3,
-    "motion": 1,
+    "motion": 3,
     "error": 0
   },
   "logo_format": {
@@ -30,7 +30,7 @@
   },
   "display": {
     "speed": 82000000,
-    "backlight": 100,
+    "backlight": 98,
     "backlight_pin": 16
   },
   "motions": {
@@ -48,8 +48,8 @@
       120
     ],
     "pos": [
-      105,
-      129
+      48,
+      206
     ]
   },
   "skins": {

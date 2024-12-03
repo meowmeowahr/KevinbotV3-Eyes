@@ -437,6 +437,7 @@ class RobotEyes:
                     if pair[1].isdigit():
                         self.settings["states"]["error"] = int(pair[1])
                         self.save_settings()
+                    self.state = State.ERORR
                 elif pair[0] == "setSkinOption":
                     # set a skin option
                     option_pairs = pair[1].split(":") # ex: ["simple", "bg_color", "#000000"]
