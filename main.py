@@ -499,6 +499,7 @@ class RobotEyes:
                     settings_copy.pop("error_format")
                     settings_copy.pop("loading_format")
                     utils.send_data(settings_copy, self.ser, "eyeSettings.")
+                    self.ser.write(b"settTx.done\n")
                 elif pair[0] == "setBacklight":
                     # set backlight brightness
                     if pair[1].isdigit():
