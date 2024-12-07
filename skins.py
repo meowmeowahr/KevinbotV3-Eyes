@@ -30,34 +30,35 @@ def eye_simple_style(
     eye_x, eye_y = pos
 
     if last_redraw + 0.05 < time.time():
-        image = Image.new("RGB", (size[0], size[1]))
+        image = Image.new("RGB", (size[0]*2, size[1]*2))
         draw = ImageDraw.Draw(image)
 
         draw.rectangle(
-            (0, 0, size[0], size[1]), fill=settings["skins"]["simple"]["bg_color"]
+            (0, 0, size[0]*2, size[1]*2), fill=settings["skins"]["simple"]["bg_color"]
         )
         draw.ellipse(
             (
-                eye_x - settings["skins"]["simple"]["iris_size"] // 2,
-                eye_y - settings["skins"]["simple"]["iris_size"] // 2,
-                eye_x + settings["skins"]["simple"]["iris_size"] // 2,
-                eye_y + settings["skins"]["simple"]["iris_size"] // 2,
+                (eye_x - settings["skins"]["simple"]["iris_size"] // 2)*2,
+                (eye_y - settings["skins"]["simple"]["iris_size"] // 2)*2,
+                (eye_x + settings["skins"]["simple"]["iris_size"] // 2)*2,
+                (eye_y + settings["skins"]["simple"]["iris_size"] // 2)*2,
             ),
             fill=settings["skins"]["simple"]["iris_color"],
         )
 
         draw.ellipse(
             (
-                eye_x - settings["skins"]["simple"]["pupil_size"] // 2,
-                eye_y - settings["skins"]["simple"]["pupil_size"] // 2,
-                eye_x + settings["skins"]["simple"]["pupil_size"] // 2,
-                eye_y + settings["skins"]["simple"]["pupil_size"] // 2,
+                (eye_x - settings["skins"]["simple"]["pupil_size"] // 2)*2,
+                (eye_y - settings["skins"]["simple"]["pupil_size"] // 2)*2,
+                (eye_x + settings["skins"]["simple"]["pupil_size"] // 2)*2,
+                (eye_y + settings["skins"]["simple"]["pupil_size"] // 2)*2,
             ),
             fill=settings["skins"]["simple"]["pupil_color"],
         )
 
+        dispimage = image.resize((size[0], size[1]), Image.Resampling.LANCZOS)
         for disp in displays:
-            disp.image(image)
+            disp.image(dispimage)
         last_redraw = time.time()
 
 

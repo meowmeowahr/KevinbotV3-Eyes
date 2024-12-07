@@ -21,8 +21,8 @@
     "text": "CONNECT\u2026"
   },
   "states": {
-    "page": 3,
-    "motion": 3,
+    "page": 1,
+    "motion": 2,
     "error": 0
   },
   "logo_format": {
@@ -30,7 +30,7 @@
   },
   "display": {
     "speed": 82000000,
-    "backlight": 98,
+    "backlight": 100,
     "backlight_pin": 16
   },
   "motions": {
@@ -48,22 +48,22 @@
       120
     ],
     "pos": [
-      48,
-      206
+      69,
+      94
     ]
   },
   "skins": {
     "simple": {
-      "bg_color": "#0022FF",
-      "iris_color": "#FFFFFF",
+      "bg_color": "#ff0000",
+      "iris_color": "#ffffff",
       "pupil_color": "#000000",
-      "iris_size": 105,
-      "pupil_size": 86
+      "iris_size": 120,
+      "pupil_size": 90
     },
     "metal": {
       "bg_color": "#ffffff",
-      "iris_size": 200,
-      "tint": 171
+      "iris_size": 80,
+      "tint": 250
     },
     "neon": {
       "bg_color": "#000000",
